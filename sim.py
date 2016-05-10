@@ -1,17 +1,8 @@
-import re
-import sys
-import time
 import random
+import time
 
 from organism import Organism
-
-
-def bernoulli(p) -> bool:
-    """
-    :param p: Probability of returning True
-    """
-    x = random.random()
-    return x < p
+from sim_tools import bernoulli, Reprinter
 
 
 class Simulation:
@@ -25,20 +16,36 @@ class Simulation:
         for row in self._grid:
             for j in range(width):
                 row.append(' ')
-        self.organisms = set()
+        self.organisms = set()  # Maps coords to organisms.
 
     def collide(self, org1: Organism, org2: Organism, resulting_coord: tuple):
         """ Handles the collision of two organisms"""
         total_power = org1.power + org2.power
+        org1_victory = bernoulli(org1.power / total_power)
+        if org1_victory:
+            self[resulting_coord[0]][resulting_coord[1]] = org1
+            self.remove_from_sim(org2)
+            org1.kills += 1
+        else:
+            self[resulting_coord[0]][resulting_coord[1]] = org2
+            self.remove_from_sim(org1)
+            org2.kills += 1
 
-    def update(self):
+    def add_to_sim(self, organism):
+        self.organisms.add(organism)
+
+    def remove_from_sim(self, organism):
+        self.organisms.remove(organism)
+        self[organism.x][organism.y] = ' '
+
+    def timestep(self):
         for organism in self.organisms:
             organism.update()
 
     def run(self):
         """ Infinitely loops. """
         while True:
-            self.randomize()
+            self.timestep()
             self.print_to_screen()
             time.sleep(0.5)
 
@@ -61,27 +68,6 @@ class Simulation:
     # sim[5]
     def __getitem__(self, key: int) -> list:
         return self._grid[key]
-
-
-
-class Reprinter:
-    def __init__(self):
-        self.text = ''
-
-    def moveup(self, lines):
-        for _ in range(lines):
-            sys.stdout.write("\x1b[A")
-
-    def reprint(self, text):
-        # Clear previous text by overwriting non-spaces with spaces
-        self.moveup(self.text.count("\n"))
-        sys.stdout.write(re.sub(r"[^\s]", " ", self.text))
-
-        # Print new text
-        lines = min(self.text.count("\n"), text.count("\n"))
-        self.moveup(lines)
-        sys.stdout.write(text)
-        self.text = text
 
 
 def main():
