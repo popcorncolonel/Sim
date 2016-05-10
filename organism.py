@@ -2,7 +2,7 @@ import uuid
 import string
 import random
 
-from sim_tools import bernoulli
+from sim_tools import bernoulli, clip
 
 
 class Organism:
@@ -44,7 +44,9 @@ class Organism:
         old_y = self.y
 
         self.x += self.x_vel
+        self.x = self.x % self.sim.width
         self.y += self.y_vel
+        self.y = self.y % self.sim.height
 
         #  Set x and y acceleration
         #  TODO: set based on proximity to other items in the grid and their relative power.
@@ -57,6 +59,8 @@ class Organism:
             self.y_accel += 1
         else:
             self.y_accel -= 1
+        self.x_accel = clip(-2, self.x_accel, 2)
+        self.y_accel = clip(-2, self.y_accel, 2)
 
         # set x_vel and y_vel based on my acceleration
         self.x_vel += self.x_accel
@@ -64,7 +68,7 @@ class Organism:
 
         self.sim[old_x][old_y] = ' '
         if isinstance(self.sim[self.x][self.y], Organism):
-            self.sim.collide(self, self.sim[self.x][self.y])
+            self.sim.collide(self, self.sim[self.x][self.y], (self.x, self.y))
             return
         else:
             self.sim[self.x][self.y] = self
