@@ -40,14 +40,16 @@ class Organism:
         """ Updates the status of the organism within its simulation.
             Also updates the simulation grid.
         """
-        old_x = self.x
-        old_y = self.y
+        (old_x, old_y) = self.update_positioning()
 
-        self.x += self.x_vel
-        self.x = self.x % self.sim.width
-        self.y += self.y_vel
-        self.y = self.y % self.sim.height
+        self.sim[old_x][old_y] = ' '
+        if isinstance(self.sim[self.x][self.y], Organism):
+            self.sim.collide(self, self.sim[self.x][self.y], (self.x, self.y))
+            return
+        else:
+            self.sim[self.x][self.y] = self
 
+    def set_accel(self):
         #  Set x and y acceleration
         #  TODO: set based on proximity to other items in the grid and their relative power.
         #  TODO: learn these based on the parameters to the organism!! Have these pref's change randomly!
@@ -59,19 +61,24 @@ class Organism:
             self.y_accel += 1
         else:
             self.y_accel -= 1
-        self.x_accel = clip(-2, self.x_accel, 2)
-        self.y_accel = clip(-2, self.y_accel, 2)
+        self.x_accel = clip(-1, self.x_accel, 1)
+        self.y_accel = clip(-1, self.y_accel, 1)
+
+    def update_positioning(self) -> tuple:
+        old_x = self.x
+        old_y = self.y
+
+        self.x += self.x_vel
+        self.x = self.x % self.sim.width
+        self.y += self.y_vel
+        self.y = self.y % self.sim.height
+
+        self.set_accel()
 
         # set x_vel and y_vel based on my acceleration
         self.x_vel += self.x_accel
         self.y_vel += self.y_accel
-
-        self.sim[old_x][old_y] = ' '
-        if isinstance(self.sim[self.x][self.y], Organism):
-            self.sim.collide(self, self.sim[self.x][self.y], (self.x, self.y))
-            return
-        else:
-            self.sim[self.x][self.y] = self
+        return old_x, old_y
 
     def __str__(self):
         return self.representing_char

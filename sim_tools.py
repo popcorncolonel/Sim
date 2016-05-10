@@ -10,9 +10,11 @@ def bernoulli(p) -> bool:
     x = random.random()
     return x < p
 
+
 def clip(lo, x, hi):
     """ lo < hi """
     return max(lo, min(hi, x))
+
 
 class Reprinter:
     def __init__(self):
