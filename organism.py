@@ -1,3 +1,4 @@
+import sys
 import uuid
 import string
 import random
@@ -10,24 +11,26 @@ class Organism:
     Has a list of attributes. up speed, down speed, right speed, up speed, diagonal speeds, can move diagonally, etc.
     Should be able to see other organisms and make decisions based on that.
     """
-    def __init__(self, sim, x, y, strength=None, representing_char=None):
+    def __init__(self, sim, x, y, power=None, representing_char=None):
         """
         :representing_char: What's going to display on the board. Has to be one char.
         """
         self.sim = sim
         self.x = x
         self.y = y
+        self.sim[x][y].append(self)
         self.hash = str(uuid.uuid4())
         self.kills = 0
 
-        if strength:
-            self.power = strength
+        if power:
+            self.power = power
         else:
             self.power = random.normalvariate(mu=5, sigma=2.5)
         self.x_vel = 0
         self.y_vel = 0
         self.x_accel = 0
         self.y_accel = 0
+        self.dead = False
 
         if representing_char:
             assert len(representing_char) == 1
@@ -42,12 +45,16 @@ class Organism:
         """
         (old_x, old_y) = self.update_positioning()
 
-        self.sim[old_x][old_y] = ' '
+        try:
+            self.sim[old_x][old_y].remove(self)
+        except:
+            print(self.sim[old_x][old_y])
+            sys.exit()
         if isinstance(self.sim[self.x][self.y], Organism):
-            self.sim.collide(self, self.sim[self.x][self.y], (self.x, self.y))
+            self.sim.collide(self, (self.x, self.y))
             return
         else:
-            self.sim[self.x][self.y] = self
+            self.sim[self.x][self.y].append(self)
 
     def set_accel(self):
         #  Set x and y acceleration
@@ -78,10 +85,19 @@ class Organism:
         # set x_vel and y_vel based on my acceleration
         self.x_vel += self.x_accel
         self.y_vel += self.y_accel
+        self.x_vel = clip(-1, self.x_vel, 1)
+        self.y_vel = clip(-1, self.y_vel, 1)
+
         return old_x, old_y
+
+    def kill(self):
+        self.dead = True
 
     def __str__(self):
         return self.representing_char
 
     def __hash__(self):
         return hash(self.hash)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)

@@ -15,62 +15,86 @@ class Simulation:
             self._grid.append([])
         for row in self._grid:
             for j in range(width):
-                row.append(' ')
+                row.append([' '])
         self.organisms = set()  # Maps coords to organisms.
         self.collisions = []  # Reset each timestep. Dealt with after the orgs are done updating.
 
-    def collide(self, org1: Organism, org2: Organism, resulting_coord: tuple):
-        self.collisions.append((org1, org2, resulting_coord))
+    def collide(self, org1: Organism, resulting_coord: tuple):
+        for org in [obj for obj in self[resulting_coord[0]][resulting_coord[1]]
+                    if isinstance(obj, Organism)]:
+            self.collisions.append((org1, org, resulting_coord))
+
+    def mate(self, org1: Organism, org2: Organism) -> Organism:
+        """ Returns the baby of org1 and org2, to-be-placed where they are """
+        #  TODO: make it be based on the genes of org1 and org2
+        power_avg = (org1.power + org2.power) / 2
+        parent_coords = (org1.x, org2.y)
+        baby = self.spawn_new_life(coords=parent_coords, representing_char=org1.representing_char, power=power_avg)
+        return baby
+
+    def battle(self, org1: Organism, org2: Organism) -> Organism:
+        """ Returns the victor of the battle. Removes the loser from the grid. """
+        pass  # TODO: make this more complex. only battle if the orgs want to battle.
 
     def handle_collisions(self):
+        """ Handles the collision of two organisms. """
         for (org1, org2, resulting_coord) in self.collisions:
-            """ Handles the collision of two organisms"""
-            total_power = org1.power + org2.power
-            org1_victory = bernoulli(org1.power / total_power)
-            if org1_victory:
-                self[resulting_coord[0]][resulting_coord[1]] = org1
-                self.remove_from_sim(org2)
-                org1.kills += 1
-            else:
-                self[resulting_coord[0]][resulting_coord[1]] = org2
-                self.remove_from_sim(org1)
-                org2.kills += 1
+            if org1.representing_char == org2.representing_char:
+                baby = self.mate(org1, org2)
+                self[resulting_coord[0]][resulting_coord[1]].append(baby)
         self.collisions = []
 
-    def add_to_sim(self, organism):
+    def add(self, organism: Organism):
         self.organisms.add(organism)
 
-    def remove_from_sim(self, organism):
-        self.organisms.remove(organism)
-        self[organism.x][organism.y] = ' '
+    def remove(self, organism: Organism):
+        if organism in self.organisms:
+            self.organisms.remove(organism)
+            organism.kill()
+            self[organism.x][organism.y].remove(organism)
 
     def timestep(self):
         for organism in self.organisms:
             organism.update()
         self.handle_collisions()
+        if bernoulli(0.1):
+            self.spawn_new_life()
 
     def run(self):
-        """ Infinitely loops. """
+        """ Infinitely loops. Could return a thread at some point but I don't see the need now. """
         while True:
             self.timestep()
             self.print_to_screen()
-            time.sleep(0.5)
+            time.sleep(0.15)
 
-    def randomize(self):
-        """ For testing. """
-        for row in self._grid:
-            for j in range(self.height):
-                row[j] = random.choice(['0', '1', '2'])
+    def spawn_new_life(self, coords=None, representing_char=None, power=None):
+        """ Creates a new organism and adds it to the simulation. """
+        if not coords:
+            x = random.randint(0, self.width - 1)
+            y = random.randint(0, self.height - 1)
+            while isinstance(self[x][y], Organism):
+                x = random.randint(0, self.width - 1)
+                y = random.randint(0, self.height - 1)
+        else:
+            assert len(coords) == 2
+            x, y = coords
+
+        org = Organism(self, x, y, representing_char=representing_char, power=power)
+        self.add(org)
+        return org
 
     def print_to_screen(self):
         self.reprinter.reprint(str(self))
 
     def __str__(self) -> str:
-        rows = []
+        rows = [' ' + '_' * self.height]
         for row in self._grid:
-            rows.append(''.join([str(x) for x in row]))
+            rowstr = '|'
+            rowstr += ''.join([str(x[-1]) for x in row])
+            rowstr += '|'
+            rows.append(rowstr)
         this_str = '\n'.join(rows)
-        return '\n' + this_str
+        return '\n' + this_str + '\n ' + '_' * self.height
 
     # sim[5]
     def __getitem__(self, key: int) -> list:
@@ -80,16 +104,8 @@ class Simulation:
 def main():
     sim = Simulation()
 
-    org1 = Organism(sim, 2, 3, 5, 'A')
-    org2 = Organism(sim, 3, 10, 4, 'B')
-    org3 = Organism(sim, 6, 13, 3, 'C')
-    org4 = Organism(sim, 0, 0, 2, 'D')
-    org5 = Organism(sim, 9, 1, 1, 'E')
-    sim.add_to_sim(org1)
-    sim.add_to_sim(org2)
-    sim.add_to_sim(org3)
-    sim.add_to_sim(org4)
-    sim.add_to_sim(org5)
+    for c in 'ABCDE':
+        sim.spawn_new_life(representing_char=c)
 
     sim.run()
 
