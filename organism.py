@@ -1,7 +1,7 @@
+import random
+import string
 import sys
 import uuid
-import string
-import random
 
 from sim_tools import bernoulli, clip
 
@@ -101,3 +101,5 @@ class Organism:
 
     def __eq__(self, other):
         return hash(self) == hash(other)
+
+

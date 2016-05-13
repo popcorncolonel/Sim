@@ -3,7 +3,7 @@ import re
 import sys
 
 
-def bernoulli(p) -> bool:
+def bernoulli(p: float) -> bool:
     """
     :param p: Probability of returning True
     """
