@@ -24,14 +24,6 @@ class Simulation:
                     if isinstance(obj, Organism)]:
             self.collisions.append((org1, org, resulting_coord))
 
-    def mate(self, org1: Organism, org2: Organism) -> Organism:
-        """ Returns the baby of org1 and org2, to-be-placed where they are """
-        #  TODO: make it be based on the genes of org1 and org2
-        power_avg = (org1.power + org2.power) / 2
-        parent_coords = (org1.x, org2.y)
-        baby = self.spawn_new_life(coords=parent_coords, representing_char=org1.representing_char, power=power_avg)
-        return baby
-
     def battle(self, org1: Organism, org2: Organism) -> Organism:
         """ Returns the victor of the battle. Removes the loser from the grid. """
         pass  # TODO: make this more complex. only battle if the orgs want to battle.
