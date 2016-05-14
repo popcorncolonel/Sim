@@ -17,24 +17,21 @@ class Simulation:
             for j in range(width):
                 row.append([' '])
         self.organisms = set()  # Maps coords to organisms.
-        self.collisions = []  # Reset each timestep. Dealt with after the orgs are done updating.
 
-    def collide(self, org1: Organism, resulting_coord: tuple):
-        for org in [obj for obj in self[resulting_coord[0]][resulting_coord[1]]
-                    if isinstance(obj, Organism)]:
-            self.collisions.append((org1, org, resulting_coord))
+    def get_objs_at_pos(self, x, y, dx, dy) -> list:
+        """
+
+        :param x,y: location of the thing
+        :param dx,dy: the dx,dy such that we are looking for (x + dx, y + dy) mod (width, height)
+        :return: list of objects at that location
+        """
+        resulting_x = (x + dx) % self.width
+        resulting_y = (y + dy) % self.height
+        return self[resulting_x][resulting_y]
 
     def battle(self, org1: Organism, org2: Organism) -> Organism:
         """ Returns the victor of the battle. Removes the loser from the grid. """
         pass  # TODO: make this more complex. only battle if the orgs want to battle.
-
-    def handle_collisions(self):
-        """ Handles the collision of two organisms. """
-        for (org1, org2, resulting_coord) in self.collisions:
-            if org1.representing_char == org2.representing_char:
-                baby = self.mate(org1, org2)
-                self[resulting_coord[0]][resulting_coord[1]].append(baby)
-        self.collisions = []
 
     def add(self, organism: Organism):
         self.organisms.add(organism)
@@ -48,7 +45,6 @@ class Simulation:
     def timestep(self):
         for organism in self.organisms:
             organism.update()
-        self.handle_collisions()
         if bernoulli(0.1):
             self.spawn_new_life()
 
@@ -91,16 +87,3 @@ class Simulation:
     # sim[5]
     def __getitem__(self, key: int) -> list:
         return self._grid[key]
-
-
-def main():
-    sim = Simulation()
-
-    for c in 'ABCDE':
-        sim.spawn_new_life(representing_char=c)
-
-    sim.run()
-
-
-if __name__ == '__main__':
-    main()

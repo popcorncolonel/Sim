@@ -1,9 +1,10 @@
-import random
-import string
 import sys
 import uuid
+import brain
+import random
+import string
 
-from sim_tools import bernoulli, clip
+from sim_tools import bernoulli, clip, binomial
 
 
 class Organism:
@@ -21,16 +22,16 @@ class Organism:
         self.sim[x][y].append(self)
         self.hash = str(uuid.uuid4())
         self.kills = 0
+        self.hunger = 0
 
         if power:
             self.power = power
         else:
-            self.power = random.normalvariate(mu=5, sigma=2.5)
-        self.x_vel = 0
-        self.y_vel = 0
-        self.x_accel = 0
-        self.y_accel = 0
+            self.power = max(0, random.normalvariate(mu=5, sigma=2.5))
         self.dead = False
+        self.actuators = brain.Actuators(sim, self)
+        self.sensors = brain.Sensors(sim, self)
+        self.genome = binomial(n=len(self.sensors.list), p=0.7)
 
         if representing_char:
             assert len(representing_char) == 1
@@ -40,55 +41,20 @@ class Organism:
             self.representing_char = random.choice(string.ascii_letters)
 
     def update(self):
-        """ Updates the status of the organism within its simulation.
-            Also updates the simulation grid.
         """
-        (old_x, old_y) = self.update_positioning()
+        Updates the status of the organism within its simulation.
+        Fires off all the sensors, which in turn will (or may) fire the actuators.
+        """
+        self.hunger += 1
+        for sensor in self.sensors.list:
+            if sensor.should_activate():
+                sensor.activate()
+        self.check_status()
 
-        try:
-            self.sim[old_x][old_y].remove(self)
-        except:
-            print(self.sim[old_x][old_y])
-            sys.exit()
-        if isinstance(self.sim[self.x][self.y], Organism):
-            self.sim.collide(self, (self.x, self.y))
-            return
-        else:
-            self.sim[self.x][self.y].append(self)
-
-    def set_accel(self):
-        #  Set x and y acceleration
-        #  TODO: set based on proximity to other items in the grid and their relative power.
-        #  TODO: learn these based on the parameters to the organism!! Have these pref's change randomly!
-        if bernoulli(0.5):
-            self.x_accel += 1
-        else:
-            self.x_accel -= 1
-        if bernoulli(0.5):
-            self.y_accel += 1
-        else:
-            self.y_accel -= 1
-        self.x_accel = clip(-1, self.x_accel, 1)
-        self.y_accel = clip(-1, self.y_accel, 1)
-
-    def update_positioning(self) -> tuple:
-        old_x = self.x
-        old_y = self.y
-
-        self.x += self.x_vel
-        self.x = self.x % self.sim.width
-        self.y += self.y_vel
-        self.y = self.y % self.sim.height
-
-        self.set_accel()
-
-        # set x_vel and y_vel based on my acceleration
-        self.x_vel += self.x_accel
-        self.y_vel += self.y_accel
-        self.x_vel = clip(-1, self.x_vel, 1)
-        self.y_vel = clip(-1, self.y_vel, 1)
-
-        return old_x, old_y
+    def check_status(self):
+        died_of_hunger = bernoulli(self.hunger / 1000)
+        if died_of_hunger:
+            self.kill()
 
     def kill(self):
         self.dead = True
@@ -101,5 +67,3 @@ class Organism:
 
     def __eq__(self, other):
         return hash(self) == hash(other)
-
-

@@ -1,4 +1,5 @@
 import sim_tools
+import sensors
 
 class Neuron:
     """
@@ -9,8 +10,8 @@ class Neuron:
             outgoing_connections = set()
         self.outgoing_connections = outgoing_connections
 
-    def add_connection(self, connection: NeuronConnection):
-        assert isinstance(connection, NeuronConnection)
+    def add_connection(self, connection):
+        assert isinstance(connection, Neuron)
         self.outgoing_connections.add(connection)
 
     def activate(self, *args):
@@ -64,9 +65,11 @@ class AttackActuator(Neuron):
         if won_battle:
             self.sim.remove(target)
             self.organism.kills += 1
+            self.organism.hunger = 0
         else:
             self.sim.remove(self.organism)
             target.kills += 1
+            target.hunger = 0
 
 
 class MateActuator(Neuron):
@@ -106,22 +109,19 @@ class Sensors(Neuron):
     """
     def __init__(self, sim, org):
         super().__init__()
+        from sim import Simulation
+        from organism import Organism
+        assert isinstance(sim, Simulation)
+        assert isinstance(org, Organism)
         self.sim = sim
         self.org = org
+        self.list = [
+            sensors.ProximitySensor(sim, org, self.outgoing_connections)
+        ]
 
     def activate(self):
         for conn in self.outgoing_connections:
             conn.activate()
-
-
-class NeuronConnection:
-    """Connects Neurons to Neurons and transmits a signal when it receives a signal """
-    def __init__(self, start: Neuron, end: Neuron):
-        self.start = start
-        self.end = end
-
-    def activate(self):
-        self.end.activate()
 
 
 class Actuators:

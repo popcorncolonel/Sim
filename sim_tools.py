@@ -11,8 +11,17 @@ def bernoulli(p: float) -> bool:
     return x < p
 
 
-def clip(lo, x, hi):
+def binomial(n: int, p: float) -> list:
+    result = []
+    for i in range(n):
+        result.append(bernoulli(p))
+    return result
+
+
+def clip(lo, x, hi=None):
     """ lo < hi """
+    if hi == None:
+        hi = float('inf')
     return max(lo, min(hi, x))
 
 
