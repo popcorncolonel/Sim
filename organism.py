@@ -12,6 +12,8 @@ class Organism:
     Has a list of attributes. up speed, down speed, right speed, up speed, diagonal speeds, can move diagonally, etc.
     Should be able to see other organisms and make decisions based on that.
     """
+    hash = str(uuid.uuid4())
+
     def __init__(self, sim, x, y, power=None, representing_char=None):
         """
         :representing_char: What's going to display on the board. Has to be one char.
@@ -52,9 +54,9 @@ class Organism:
         self.check_status()
 
     def check_status(self):
-        died_of_hunger = bernoulli(self.hunger / 1000)
+        died_of_hunger = bernoulli(self.hunger / 5000)
         if died_of_hunger:
-            self.kill()
+            self.sim.remove(self)
 
     def kill(self):
         self.dead = True

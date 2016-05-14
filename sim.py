@@ -1,5 +1,6 @@
 import random
 import time
+from copy import deepcopy
 
 from organism import Organism
 from sim_tools import bernoulli, Reprinter
@@ -17,6 +18,7 @@ class Simulation:
             for j in range(width):
                 row.append([' '])
         self.organisms = set()  # Maps coords to organisms.
+        self.kill_list = []
 
     def get_objs_at_pos(self, x, y, dx, dy) -> list:
         """
@@ -36,15 +38,21 @@ class Simulation:
     def add(self, organism: Organism):
         self.organisms.add(organism)
 
+    def clean_kill_list(self):
+        for organism in self.kill_list:
+            if organism in self.organisms:
+                self.organisms.remove(organism)
+                organism.kill()
+                self[organism.x][organism.y][self[organism.x][organism.y].index(organism)] = 'X'
+        self.kill_list = []
+
     def remove(self, organism: Organism):
-        if organism in self.organisms:
-            self.organisms.remove(organism)
-            organism.kill()
-            self[organism.x][organism.y].remove(organism)
+        self.kill_list.append(organism)
 
     def timestep(self):
         for organism in self.organisms:
             organism.update()
+        self.clean_kill_list()
         if bernoulli(0.1):
             self.spawn_new_life()
 
