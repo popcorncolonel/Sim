@@ -1,4 +1,11 @@
-
+"""
+Can sense whether there is an organism immediately surrounding you,
+can compare the power of organisms,
+can look left,right,up,upright,downleft,...,
+can see how many organisms are at a location
+can see if you are the same representative character of any of these,
+TODO: add more sensors
+"""
 
 class Sensor:
     def __init__(self, sim, org, outgoing_connections=[]):
@@ -20,35 +27,41 @@ class Sensor:
 
     def activate(self, target=None):
         for conn in self.outgoing_connections:
-            conn.activate()
+            conn.activate(target)
 
 
 class ProximitySensor(Sensor):
-    def should_activate(self) -> bool:
+    """
+    Activates when the organism is right next to another organism
+    """
+    def should_activate(self) -> object:
+        """
+        :return: False or a target
+        """
         from organism import Organism
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 1,0):
             if isinstance(obj, Organism):
-                return True
+                return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 1,1):
             if isinstance(obj, Organism):
-                return True
+                return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0,1):
             if isinstance(obj, Organism):
-                return True
+                return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -1,0):
             if isinstance(obj, Organism):
-                return True
+                return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 1,-1):
             if isinstance(obj, Organism):
-                return True
+                return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -1,1):
             if isinstance(obj, Organism):
-                return True
+                return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0,-1):
             if isinstance(obj, Organism):
-                return True
+                return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -1,-1):
             if isinstance(obj, Organism):
-                return True
+                return obj
         return False
 

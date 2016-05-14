@@ -31,9 +31,13 @@ class Organism:
         else:
             self.power = max(0, random.normalvariate(mu=5, sigma=2.5))
         self.dead = False
-        self.actuators = brain.Actuators(sim, self)
-        self.sensors = brain.Sensors(sim, self)
-        self.genome = binomial(n=len(self.sensors.list), p=0.7)
+        self.actuators = brain.Actuators(sim, self).list
+        #self.sensors = brain.Sensors(sim, self).list
+        from actuators import AttackActuator
+        from sensors import ProximitySensor
+        attack_actuator = AttackActuator(sim, self)
+        self.sensors = [ProximitySensor(sim, self, [attack_actuator])]
+        self.genome = binomial(n=len(self.sensors), p=0.7)
 
         if representing_char:
             assert len(representing_char) == 1
@@ -48,10 +52,15 @@ class Organism:
         Fires off all the sensors, which in turn will (or may) fire the actuators.
         """
         self.hunger += 1
-        for sensor in self.sensors.list:
-            if sensor.should_activate():
-                sensor.activate()
-        self.check_status()
+        for sensor in self.sensors:
+            should_activate = sensor.should_activate()
+            if should_activate:
+                if isinstance(should_activate, bool):
+                    sensor.activate()
+                else:
+                    target = should_activate
+                    sensor.activate(target)
+        #self.check_status()
 
     def check_status(self):
         died_of_hunger = bernoulli(self.hunger / 5000)
