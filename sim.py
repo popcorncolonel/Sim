@@ -43,7 +43,8 @@ class Simulation:
             if organism in self.organisms:
                 self.organisms.remove(organism)
                 organism.kill()
-                self[organism.x][organism.y][self[organism.x][organism.y].index(organism)] = 'X'
+                # self[organism.x][organism.y][self[organism.x][organism.y].index(organism)] = 'X'
+                self[organism.x][organism.y].remove(organism)
         self.kill_list = []
 
     def remove(self, organism: Organism):

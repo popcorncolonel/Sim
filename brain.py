@@ -10,7 +10,7 @@ class Neuron:
     """
     def __init__(self, outgoing_connections=None):
         if outgoing_connections is None:
-            outgoing_connections = set()
+            outgoing_connections = list()
         self.outgoing_connections = outgoing_connections
 
     def add_connection(self, connection):
@@ -21,7 +21,7 @@ class Neuron:
         pass
 
 
-class Sensors(Neuron):
+class Sensors:
     def __init__(self, sim, org):
         super().__init__()
         from sim import Simulation
@@ -31,12 +31,8 @@ class Sensors(Neuron):
         self.sim = sim
         self.org = org
         self.list = [
-            sensors.ProximitySensor(sim, org, self.outgoing_connections)
+            sensors.ProximitySensor(sim, org, [])
         ]
-
-    def activate(self):
-        for conn in self.outgoing_connections:
-            conn.activate()
 
 
 class Actuators:
@@ -67,19 +63,35 @@ class Actuators:
                      ]
 
 
-class IntermediaryNeuron(sensors.Sensor):
+class IntermediaryNeuron(Neuron):
     def __init__(self, sim, org, outgoing_connections=[]):
-        super().__init__(sim, org, outgoing_connections)
+        super().__init__(outgoing_connections)
+        self.sim = sim
+        self.org = org
         self.parents = []
         self.parent_signals = []
 
     def reset(self):
         for i in range(len(self.parent_signals)):
-            self.parent_signals[i] = False
+            self.parent_signals[i] = None
 
     def add_parent(self, parent):
         self.parents.append(parent)
         self.parent_signals.append(False)
+
+    def broadcast(self, target):
+        for conn in self.outgoing_connections:
+            conn.activate(target, self)
+
+    def all_signals_received(self):
+        parents_all_received = list(filter(lambda x: x==None, self.parent_signals)) == []
+        return parents_all_received
+
+    def should_broadcast(self) -> bool:
+        """
+        Invariant: there are no items in self.parent_signals that are None
+        """
+        return all(self.parent_signals)
 
     def activate(self, target=None, parent=None):
         """
@@ -87,8 +99,45 @@ class IntermediaryNeuron(sensors.Sensor):
         """
         assert parent
         parent_index = self.parents.index(parent)
-        self.parent_signals[parent_index] = True
-        if all(self.parent_signals):
-            for conn in self.outgoing_connections:
-                conn.activate(target, self)  # TODO: make target a list? What happens if 2 proximity sensors are hooked up to an AND gate and both detect different objects?
+        self.parent_signals[parent_index] = target  # TODO: make target a list? What happens if 2 proximity sensors are hooked up to an AND gate and both detect different objects?
+        if not self.all_signals_received():  # wait for a response from all parents before saying something
+            return
+        else:
+            assert list(filter(lambda x:x==None, self.parent_signals)) == []
+            if self.should_broadcast():
+                self.broadcast(target)
+            else:
+                self.broadcast(False)
 
+
+class XOR(IntermediaryNeuron):
+    def should_broadcast(self) -> bool:
+        result = False
+        for i in self.parent_signals:
+            assert i != None
+            result ^= bool(i)
+        return result
+
+
+class AND(IntermediaryNeuron):
+    def should_broadcast(self) -> bool:
+        for i in self.parent_signals:
+            if not i:
+                return False
+        return True
+
+
+class OR(IntermediaryNeuron):
+    def should_broadcast(self) -> bool:
+        for i in self.parent_signals:
+            if i:
+                return True
+        return False
+
+
+class MiddleNeurons:
+    def __init__(self, sim, org):
+        self.direct = IntermediaryNeuron(sim, org)
+        self.list = [
+            self.direct
+        ]

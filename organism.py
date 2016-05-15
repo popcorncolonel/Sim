@@ -40,10 +40,10 @@ class Organism:
         middle = brain.IntermediaryNeuron(sim, self, [attack_actuator])
         middle.add_parent(self.sensors[0])
         self.sensors[0].add_connection(middle)
-        self.genome = []
+        self.genome = [middle]
         """ TODO: Make each organism have a list of intermediate/connecting gates that can be XOR, not, direct yes, AND, NAND, OR, NOR, etc.
                   This is the genome.
-            TODO: Find a good way to represent this (list? hash table?)
+            TODO: Find a way to automatically connect sensors to gates to gates to ... to gates to actuators
         """
 
         if representing_char:
@@ -63,10 +63,15 @@ class Organism:
             should_activate = sensor.should_activate()
             if should_activate:
                 if isinstance(should_activate, bool):
-                    sensor.activate()
+                    hjghj
+                    sensor.activate(True)
                 else:
                     target = should_activate
                     sensor.activate(target)
+            else:
+                sensor.activate(False, self)
+        for gate in self.genome:
+            gate.reset()
         #self.check_status()
 
     def check_status(self):

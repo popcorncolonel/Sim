@@ -24,6 +24,8 @@ class MoveActuator(Actuator):
         self.delta_y = delta_y
 
     def activate(self, target=None, parent=None) -> None:
+        if target == False:
+            return
         self.sim[self.organism.x][self.organism.y].remove(self.organism)
         self.organism.x += self.delta_x
         self.organism.y += self.delta_y
@@ -43,6 +45,8 @@ class AttackActuator(Actuator):
         :type target: Organism
         """
         if False:  # if they try to attack something that's more than one unit away
+            return
+        if not target:
             return
         prob_victory = self.organism.power / (self.organism.power + target.power)
         won_battle = sim_tools.bernoulli(prob_victory)
@@ -65,6 +69,8 @@ class MateActuator(Actuator):
     def activate(self, target, parent=None):
         """ Returns the baby of self.organism and target, to-be-placed where they are """
         if False:  # if they try to mate with something that's more than 1 unit away
+            return
+        if not target:
             return
         power_avg = (target.power + self.organism.power) / 2
         parent_coords = (self.organism.x, self.organism.y)

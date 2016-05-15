@@ -23,7 +23,7 @@ class Sensor:
     def should_activate(self) -> bool:
         return False
 
-    def activate(self, target=None, parent=None):
+    def activate(self, target, parent=None):
         for conn in self.outgoing_connections:
             conn.activate(target, self)
 
