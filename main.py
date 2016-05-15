@@ -11,7 +11,7 @@ def main():
         width = height = int(sys.argv[1])
     sim = Simulation(width, height)
 
-    for c in 'ABCDE':
+    for c in 'abcde':
         sim.spawn_new_life(representing_char=c)
 
     sim.run()

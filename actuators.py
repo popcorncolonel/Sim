@@ -23,7 +23,7 @@ class MoveActuator(Actuator):
         self.delta_x = delta_x
         self.delta_y = delta_y
 
-    def activate(self) -> None:
+    def activate(self, target=None, parent=None) -> None:
         self.sim[self.organism.x][self.organism.y].remove(self.organism)
         self.organism.x += self.delta_x
         self.organism.y += self.delta_y
@@ -36,7 +36,7 @@ class AttackActuator(Actuator):
     """
     Can battle another organism if they're one unit away from you
     """
-    def activate(self, target):
+    def activate(self, target, parent=None):
         """
         Check if theyre 1 unit away
 
@@ -47,20 +47,22 @@ class AttackActuator(Actuator):
         prob_victory = self.organism.power / (self.organism.power + target.power)
         won_battle = sim_tools.bernoulli(prob_victory)
         if won_battle:
-            self.sim.remove(target)
-            self.organism.kills += 1
-            self.organism.hunger = 0
+            winner = self.organism
+            loser = target
         else:
-            self.sim.remove(self.organism)
-            target.kills += 1
-            target.hunger = 0
+            winner = target
+            loser = self.organism
+        self.sim.remove(loser)
+        winner.kills += 1
+        winner.hunger = 0
+        winner.power += 1
 
 
 class MateActuator(Actuator):
     """
     Can mate with another organism if they're one unit away from you
     """
-    def activate(self, target):
+    def activate(self, target, parent=None):
         """ Returns the baby of self.organism and target, to-be-placed where they are """
         if False:  # if they try to mate with something that's more than 1 unit away
             return

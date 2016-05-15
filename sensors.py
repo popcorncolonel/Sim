@@ -18,17 +18,14 @@ class Sensor:
         self.outgoing_connections = outgoing_connections
 
     def add_connection(self, neuron):
-        from brain import Neuron
-        assert isinstance(neuron, Neuron)
         self.outgoing_connections.append(neuron)
 
     def should_activate(self) -> bool:
         return False
 
-    def activate(self, target=None):
+    def activate(self, target=None, parent=None):
         for conn in self.outgoing_connections:
-            conn.activate(target)
-
+            conn.activate(target, self)
 
 class ProximitySensor(Sensor):
     """
@@ -62,6 +59,9 @@ class ProximitySensor(Sensor):
                 return obj
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -1,-1):
             if isinstance(obj, Organism):
+                return obj
+        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0,0):  #  Check if anything is in the current position
+            if isinstance(obj, Organism) and obj != self.org:
                 return obj
         return False
 

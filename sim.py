@@ -56,6 +56,12 @@ class Simulation:
         if bernoulli(0.1):
             self.spawn_new_life()
 
+    def is_one_unit_away(self, pos1: tuple, pos2: tuple) -> bool:
+        """
+         Doesn't handle edge cases (pos1 = on left border, pos2 = on right border)
+        """
+        return abs(pos1[0] - pos2[0]) <= 1 and abs(pos1[0] - pos2[0]) <= 1
+
     def run(self):
         """ Infinitely loops. Could return a thread at some point but I don't see the need now. """
         while True:

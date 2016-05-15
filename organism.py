@@ -36,15 +36,22 @@ class Organism:
         from actuators import AttackActuator
         from sensors import ProximitySensor
         attack_actuator = AttackActuator(sim, self)
-        self.sensors = [ProximitySensor(sim, self, [attack_actuator])]
-        self.genome = binomial(n=len(self.sensors), p=0.7)
+        self.sensors = [ProximitySensor(sim, self, [])]
+        middle = brain.IntermediaryNeuron(sim, self, [attack_actuator])
+        middle.add_parent(self.sensors[0])
+        self.sensors[0].add_connection(middle)
+        self.genome = []
+        """ TODO: Make each organism have a list of intermediate/connecting gates that can be XOR, not, direct yes, AND, NAND, OR, NOR, etc.
+                  This is the genome.
+            TODO: Find a good way to represent this (list? hash table?)
+        """
 
         if representing_char:
             assert len(representing_char) == 1
             assert isinstance(representing_char, str)
             self.representing_char = representing_char
         else:
-            self.representing_char = random.choice(string.ascii_letters)
+            self.representing_char = random.choice(string.ascii_lowercase)
 
     def update(self):
         """
