@@ -64,12 +64,12 @@ class Actuators:
 
 
 class IntermediaryNeuron(Neuron):
-    def __init__(self, sim, org, outgoing_connections=[]):
+    def __init__(self, sim, org, outgoing_connections=[], parents=[]):
         super().__init__(outgoing_connections)
         self.sim = sim
         self.org = org
-        self.parents = []
-        self.parent_signals = []
+        self.parents = parents
+        self.parent_signals = [None for _ in parents]
 
     def reset(self):
         for i in range(len(self.parent_signals)):
@@ -77,7 +77,7 @@ class IntermediaryNeuron(Neuron):
 
     def add_parent(self, parent):
         self.parents.append(parent)
-        self.parent_signals.append(False)
+        self.parent_signals.append(None)
 
     def broadcast(self, target):
         for conn in self.outgoing_connections:
@@ -105,7 +105,8 @@ class IntermediaryNeuron(Neuron):
         else:
             assert list(filter(lambda x:x==None, self.parent_signals)) == []
             if self.should_broadcast():
-                self.broadcast(target)
+                #  TODO: broadcast only the things that evaluate to truthy?
+                self.broadcast(self.parent_signals)
             else:
                 self.broadcast(False)
 

@@ -24,6 +24,9 @@ class MoveActuator(Actuator):
         self.delta_y = delta_y
 
     def activate(self, target=None, parent=None) -> None:
+        # TODO: turn this intervace into a TowardsActuator and an AwayActuator that
+        #       takes in an argument (target is a list now!!!) and goes
+        #       towards/away from something, using THESE moveactuators
         if target == False:
             return
         self.sim[self.organism.x][self.organism.y].remove(self.organism)
@@ -48,6 +51,7 @@ class AttackActuator(Actuator):
             return
         if not target:
             return
+        # TODO: TARGET IS A LIST OF ORGANISMS NOW. What do i do about it??? random.choice from the list of organisms? attack all?
         prob_victory = self.organism.power / (self.organism.power + target.power)
         won_battle = sim_tools.bernoulli(prob_victory)
         if won_battle:
