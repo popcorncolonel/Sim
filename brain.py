@@ -64,11 +64,17 @@ class Actuators:
 
 
 class IntermediaryNeuron(Neuron):
-    def __init__(self, sim, org, outgoing_connections=[], parents=[]):
+    def __init__(self, sim, org, outgoing_connections=None, parents=None):
         super().__init__(outgoing_connections)
+        if parents is None:
+            parents = []
+        if outgoing_connections is None:
+            outgoing_connections = []
         self.sim = sim
         self.org = org
         self.parents = parents
+        for parent in parents:
+            parent.outgoing_connections.append(self)
         self.parent_signals = [None for _ in parents]
 
     def reset(self):
@@ -114,27 +120,40 @@ class IntermediaryNeuron(Neuron):
 class XOR(IntermediaryNeuron):
     def should_broadcast(self) -> bool:
         result = False
-        for i in self.parent_signals:
-            assert i != None
-            result ^= bool(i)
+        for signal in self.parent_signals:
+            assert signal != None
+            result ^= bool(signal)
         return result
 
 
 class AND(IntermediaryNeuron):
     def should_broadcast(self) -> bool:
-        for i in self.parent_signals:
-            if not i:
+        for signal in self.parent_signals:
+            if not signal:
                 return False
         return True
 
 
 class OR(IntermediaryNeuron):
     def should_broadcast(self) -> bool:
-        for i in self.parent_signals:
-            if i:
+        for signal in self.parent_signals:
+            if signal:
                 return True
         return False
 
+class NOR(IntermediaryNeuron):
+    def should_broadcast(self) -> bool:
+        for signal in self.parent_signals:
+            if signal:
+                return False
+        return True
+
+class NAND(IntermediaryNeuron):
+    def should_broadcast(self) -> bool:
+        for signal in self.parent_signals:
+            if not signal:
+                return False
+        return True
 
 class MiddleNeurons:
     def __init__(self, sim, org):

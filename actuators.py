@@ -1,7 +1,9 @@
 import sim_tools
-
+import random
 
 class Actuator:
+    """ Only actuates on all organisms. "targets" can be False.
+    """
     def __init__(self, sim, org):
         from sim import Simulation
         from organism import Organism
@@ -10,8 +12,18 @@ class Actuator:
         self.sim = sim
         self.organism = org
 
-    def activate(self, *args):
-        pass
+    def actuate(self, target):
+        # Actuates on an organism. Perhaps eventually an erroneous assumption, but works for now (there is nothing other than organisms)
+        assert False  # this must be overwritten by the actuator
+
+    def activate(self, targets=None, parent=None):
+        if not targets:
+            return
+        else:
+            import organism
+            for target in targets:
+                if isinstance(target, organism.Organism):
+                    self.actuate(target)
 
 
 class MoveActuator(Actuator):
@@ -23,12 +35,10 @@ class MoveActuator(Actuator):
         self.delta_x = delta_x
         self.delta_y = delta_y
 
-    def activate(self, target=None, parent=None) -> None:
+    def actuate(self, target) -> None:
         # TODO: turn this intervace into a TowardsActuator and an AwayActuator that
         #       takes in an argument (target is a list now!!!) and goes
         #       towards/away from something, using THESE moveactuators
-        if target == False:
-            return
         self.sim[self.organism.x][self.organism.y].remove(self.organism)
         self.organism.x += self.delta_x
         self.organism.y += self.delta_y
@@ -41,17 +51,12 @@ class AttackActuator(Actuator):
     """
     Can battle another organism if they're one unit away from you
     """
-    def activate(self, target, parent=None):
+    def actuate(self, target):
         """
-        Check if theyre 1 unit away
-
-        :type target: Organism
+        Only attack if Check if the target(s) is(are) 1 unit away
         """
         if False:  # if they try to attack something that's more than one unit away
             return
-        if not target:
-            return
-        # TODO: TARGET IS A LIST OF ORGANISMS NOW. What do i do about it??? random.choice from the list of organisms? attack all?
         prob_victory = self.organism.power / (self.organism.power + target.power)
         won_battle = sim_tools.bernoulli(prob_victory)
         if won_battle:
@@ -70,11 +75,9 @@ class MateActuator(Actuator):
     """
     Can mate with another organism if they're one unit away from you
     """
-    def activate(self, target, parent=None):
+    def actuate(self, target):
         """ Returns the baby of self.organism and target, to-be-placed where they are """
         if False:  # if they try to mate with something that's more than 1 unit away
-            return
-        if not target:
             return
         power_avg = (target.power + self.organism.power) / 2
         parent_coords = (self.organism.x, self.organism.y)
@@ -86,4 +89,3 @@ class MateActuator(Actuator):
             char = target.representing_char
         baby = self.sim.spawn_new_life(coords=parent_coords, representing_char=char, power=power_avg)
         return baby
-    pass

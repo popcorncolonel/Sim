@@ -7,7 +7,7 @@ from sim_tools import bernoulli, Reprinter
 
 
 class Simulation:
-    def __init__(self, height=14, width=30):
+    def __init__(self, height=35, width=109):
         self.reprinter = Reprinter()
         self.width = height  # Internally not the same but who cares. just think about it as if x += 1 means "go right"
         self.height = width

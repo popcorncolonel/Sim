@@ -8,7 +8,9 @@ TODO: add more sensors
 """
 
 class Sensor:
-    def __init__(self, sim, org, outgoing_connections=[]):
+    def __init__(self, sim, org, outgoing_connections=None):
+        if outgoing_connections is None:
+            outgoing_connections = []
         from sim import Simulation
         from organism import Organism
         assert isinstance(sim, Simulation)
@@ -24,8 +26,10 @@ class Sensor:
         return False
 
     def activate(self, target, parent=None):
+        # Activates with False if it shouldn't activate. Otherwise, "target" is an Organism. (for now)
         for conn in self.outgoing_connections:
             conn.activate(target, self)
+
 
 class ProximitySensor(Sensor):
     """
