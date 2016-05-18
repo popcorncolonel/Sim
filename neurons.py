@@ -64,10 +64,11 @@ class Neuron:
     def activate(self, target, signal, parent):
         assert parent
         assert signal is not None
-        parent_index = self.parents.index(parent)
-        self.parent_signals[parent_index] = signal  # Assign target and signal
-        self.parent_targets[parent_index] = target  # target can be None - for example, if ProximityActuator doesn't see anyone around.
-        self.broadcast_if_ready()
+        for parent_index, other_parent in enumerate(self.parents):
+            if parent == other_parent:
+                self.parent_signals[parent_index] = signal  # Assign target and signal
+                self.parent_targets[parent_index] = target  # target can be None - for example, if ProximityActuator doesn't see anyone around.
+                self.broadcast_if_ready()
 
 
 class XOR(Neuron):

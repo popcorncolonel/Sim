@@ -53,7 +53,7 @@ class Tests(unittest.TestCase):
         actuator.actuate = fail_case  # make sure it doesnt happen
 
         middle_xor = neurons.XOR(self.sim, self.org, parents=[sensor, sensor2])
-        middle_xor2 = neurons.XOR(self.sim, self.org, parents=[middle_xor, middle_xor, middle_xor])
+        middle_xor2 = neurons.XOR(self.sim, self.org, parents=[middle_xor, middle_xor, middle_xor, middle_xor])
         middle_xor2.add_connection(actuator)
 
         sensor.activate(self.org, False)
