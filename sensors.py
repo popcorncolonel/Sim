@@ -22,20 +22,24 @@ class Sensor:
     def add_connection(self, neuron):
         self.outgoing_connections.append(neuron)
 
-    def should_activate(self) -> bool:
-        return False
+    def get_target(self) -> object:
+        return None  # Can be None or an Organism (for now)
 
-    def activate(self, target, parent=None):
+    def activate(self, target, signal) -> None:
+        """
+        :param target: Organism or None
+        :param signal: bool - whether or not we detected something
+        """
         # Activates with False if it shouldn't activate. Otherwise, "target" is an Organism. (for now)
         for conn in self.outgoing_connections:
-            conn.activate(target, self)
+            conn.activate(target, signal, parent=self)
 
 
 class ProximitySensor(Sensor):
     """
     Activates when the organism is right next to another organism
     """
-    def should_activate(self) -> object:
+    def get_target(self) -> object:
         """
         :return: False or a target
         """
@@ -67,5 +71,5 @@ class ProximitySensor(Sensor):
         for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0,0):  #  Check if anything is in the current position
             if isinstance(obj, Organism) and obj != self.org:
                 return obj
-        return False
+        return None
 

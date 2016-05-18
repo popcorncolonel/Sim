@@ -4,6 +4,7 @@ import brain
 import random
 import string
 
+import neurons
 from sim_tools import bernoulli, clip, binomial
 
 
@@ -37,7 +38,7 @@ class Organism:
         from sensors import ProximitySensor
         attack_actuator = AttackActuator(sim, self)
         self.sensors = [ProximitySensor(sim, self, [])]
-        middle = brain.IntermediaryNeuron(sim, self, [attack_actuator])
+        middle = neurons.Neuron(sim, self, [attack_actuator])
         middle.add_parent(self.sensors[0])
         self.sensors[0].add_connection(middle)
         self.genome = [middle]
@@ -60,16 +61,11 @@ class Organism:
         """
         self.hunger += 1
         for sensor in self.sensors:
-            should_activate = sensor.should_activate()
-            if should_activate:
-                if isinstance(should_activate, bool):
-                    hjghj
-                    sensor.activate(True)
-                else:
-                    target = should_activate
-                    sensor.activate(target)
+            target = sensor.get_target()
+            if target is not None:
+                sensor.activate(target, signal=True)
             else:
-                sensor.activate(False, self)
+                sensor.activate(None, signal=False)
         for gate in self.genome:
             gate.reset()
         #self.check_status()

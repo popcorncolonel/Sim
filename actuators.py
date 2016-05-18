@@ -13,17 +13,20 @@ class Actuator:
         self.organism = org
 
     def actuate(self, target):
-        # Actuates on an organism. Perhaps eventually an erroneous assumption, but works for now (there is nothing other than organisms)
+        """
+        Actuates on an organism. Perhaps eventually an erroneous assumption,
+        but works for now (there is nothing other than organisms)
+        """
         assert False  # this must be overwritten by the actuator
 
-    def activate(self, targets=None, parent=None):
-        if not targets:
+    def activate(self, targets=None, signal=None, parent=None):
+        assert signal is not None
+        if signal == False:
             return
-        else:
-            import organism
-            for target in targets:
-                if isinstance(target, organism.Organism):
-                    self.actuate(target)
+        import organism
+        for target in targets:  # TODO: is this correct functionality?
+            if isinstance(target, organism.Organism):
+                self.actuate(target)
 
 
 class MoveActuator(Actuator):
