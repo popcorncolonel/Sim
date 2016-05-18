@@ -33,12 +33,13 @@ class Organism:
             self.power = max(0, random.normalvariate(mu=5, sigma=2.5))
         self.dead = False
         self.actuators = brain.Actuators(sim, self).list
-        #self.sensors = brain.Sensors(sim, self).list
+        # self.sensors = brain.Sensors(sim, self).list
         from actuators import AttackActuator
         from sensors import ProximitySensor
         attack_actuator = AttackActuator(sim, self)
-        self.sensors = [ProximitySensor(sim, self, [])]
-        middle = neurons.Neuron(sim, self, [attack_actuator])
+        self.sensors = [ProximitySensor(sim, self)]
+        middle = neurons.Neuron(sim, self)
+        middle.add_connection(attack_actuator)
         middle.add_parent(self.sensors[0])
         self.sensors[0].add_connection(middle)
         self.genome = [middle]

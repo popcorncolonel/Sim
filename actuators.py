@@ -19,14 +19,11 @@ class Actuator:
         """
         assert False  # this must be overwritten by the actuator
 
-    def activate(self, targets=None, signal=None, parent=None):
+    def activate(self, target=None, signal=None, parent=None):
         assert signal is not None
         if signal == False:
             return
-        import organism
-        for target in targets:  # TODO: is this correct functionality?
-            if isinstance(target, organism.Organism):
-                self.actuate(target)
+        self.actuate(target)
 
 
 class MoveActuator(Actuator):

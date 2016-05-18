@@ -1,15 +1,17 @@
+import random
+
 class Neuron:
     def __init__(self, sim, org, outgoing_connections=None, parents=None):
         if parents is None:
             parents = []
         if outgoing_connections is None:
-            outgoing_connections = list()
-        self.ourgoing_connections = outgoing_connections
+            outgoing_connections = set()
+        self.outgoing_connections = outgoing_connections
         self.sim = sim
         self.org = org
         self.parents = parents
         for parent in parents:
-            parent.outgoing_connections.append(self)
+            parent.outgoing_connections.add(self)
         self.parent_signals = [None for _ in parents]
         self.parent_targets = [None for _ in parents]
 
@@ -38,23 +40,34 @@ class Neuron:
         """
         return all(self.parent_signals)
 
-    def activate(self, target=None, signal=None, parent=None):
-        """
-        Set parent signals of the proper index to false
-        """
-        assert parent
-        assert signal is not None
-        parent_index = self.parents.index(parent)
-        self.parent_signals[parent_index] = signal
-        self.parent_targets[parent_index] = target  # target can be None - for example, if ProximityActuator doesn't see anyone around.
+    def broadcast_if_ready(self):
         if not self.all_signals_received():  # wait for a response from all parents before saying something
             return
         else:
-            assert list(filter(lambda x:x==None, self.parent_signals)) == []
+            assert list(filter(lambda x: x is None, self.parent_signals)) == []
+            """ TODO: figure out what to do about this.
             if self.should_broadcast():
                 self.broadcast(self.parent_targets, True)
             else:
                 self.broadcast(self.parent_targets, False)
+            """
+            org_list = [target for target in self.parent_targets if target is not None]
+            if org_list == []:
+                random_target = None
+            else:
+                random_target = random.choice(org_list)  # TODO: random target is probably not a good idea
+            if self.should_broadcast():
+                self.broadcast(random_target, True)
+            else:
+                self.broadcast(random_target, False)
+
+    def activate(self, target, signal, parent):
+        assert parent
+        assert signal is not None
+        parent_index = self.parents.index(parent)
+        self.parent_signals[parent_index] = signal  # Assign target and signal
+        self.parent_targets[parent_index] = target  # target can be None - for example, if ProximityActuator doesn't see anyone around.
+        self.broadcast_if_ready()
 
 
 class XOR(Neuron):

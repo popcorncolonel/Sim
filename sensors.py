@@ -10,7 +10,7 @@ TODO: add more sensors
 class Sensor:
     def __init__(self, sim, org, outgoing_connections=None):
         if outgoing_connections is None:
-            outgoing_connections = []
+            outgoing_connections = set()
         from sim import Simulation
         from organism import Organism
         assert isinstance(sim, Simulation)
@@ -20,7 +20,7 @@ class Sensor:
         self.outgoing_connections = outgoing_connections
 
     def add_connection(self, neuron):
-        self.outgoing_connections.append(neuron)
+        self.outgoing_connections.add(neuron)
 
     def get_target(self) -> object:
         return None  # Can be None or an Organism (for now)
