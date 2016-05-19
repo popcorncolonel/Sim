@@ -19,6 +19,7 @@ class Simulation:
         self.organisms = set()  # Maps coords to organisms.
         self.kill_list = []
         self.baby_list = []
+        self.sim_start_time = time.time()
 
     def get_objs_at_pos(self, x, y, dx, dy) -> list:
         """
@@ -101,6 +102,10 @@ class Simulation:
         this_str += '\n' + "Organisms: " + str(len(self.organisms))
         this_str += "  |  "
         this_str += "Max power: " + str(max(self.organisms, key=lambda x: x.power).power)
+        this_str += "  |  "
+        this_str += "Max #kills: " + str(max(self.organisms, key=lambda x: x.kills).kills)
+        this_str += "  |  "
+        this_str += "Max age: " + str(int(max(self.organisms, key=lambda x: x.start_time).start_time - self.sim_start_time))
         this_str += '\n'
         return '\n' + this_str
 
