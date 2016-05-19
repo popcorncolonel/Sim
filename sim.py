@@ -54,7 +54,7 @@ class Simulation:
         for organism in self.organisms:
             organism.update()
         self.clean_kill_list()
-        if bernoulli(0.1):
+        if len(self.organisms) < 10 and bernoulli(0.1):
             self.spawn_new_life()
 
     def run(self):
@@ -77,6 +77,7 @@ class Simulation:
             x, y = coords
 
         if power is not None:
+            assert type(power) is int
             power = random.normalvariate(power, 1.0)
         org = Organism(self, x, y, representing_char=representing_char, power=power)
         self.add(org)

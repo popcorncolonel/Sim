@@ -25,6 +25,12 @@ class Organism:
         self.sim[x][y].append(self)
         self.hash = str(uuid.uuid4())
         self.kills = 0
+        if representing_char:
+            assert len(representing_char) == 1
+            assert isinstance(representing_char, str)
+            self.representing_char = representing_char
+        else:
+            self.representing_char = random.choice("abcde")
 
         if power:
             self.power = power
@@ -35,20 +41,11 @@ class Organism:
         self.actuators = brain.Actuators(sim, self).list
 
         self.genome = []  # This should be dicts representing to what depth we connect stuff.
-                                # i.e. {"neuron": 1,
-        #                               "parents": ["sensor": 0, "neuron": 2], # can be sensors or neurons, but NOT actuators
-        #                               "connections": ["actuator": 1, "neuron": 3"] } # can be actuators or neurons, but NOT sensors
-        """ TODO: Make each organism have a list of intermediate/connecting gates that can be XOR, not, direct yes, AND, NAND, OR, NOR, etc.
-                  This is the genome.
-            TODO: Find a way to automatically connect sensors to gates to gates to ... to gates to actuators
-        """
+                                # i.e. [ { "type": MoreKills,
+        #                                  "parents": ["sensor": 0, "neuron": 2], # can be sensors or neurons, but NOT actuators
+        #                                  "connections": ["actuator": 1, "neuron": 3"] } # can be actuators or neurons, but NOT sensors ]
+        """ Neuron numbers are indices into the genome list. """
 
-        if representing_char:
-            assert len(representing_char) == 1
-            assert isinstance(representing_char, str)
-            self.representing_char = representing_char
-        else:
-            self.representing_char = random.choice(string.ascii_lowercase)
 
     def update(self):
         """

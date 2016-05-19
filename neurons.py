@@ -3,6 +3,7 @@ import sim_tools
 
 
 class Neuron:
+    __id__ = "BaseNeuron"
     def __init__(self, sim, org, outgoing_connections=None, parents=None):
         if parents is None:
             parents = []
@@ -80,11 +81,13 @@ class Neuron:
 
 
 class Direct(Neuron):
+    __id__ = "Direct"
     def should_broadcast(self) -> bool:
         return all(self.parent_signals)
 
 
 class XOR(Neuron):
+    __id__ = "XOR"
     def should_broadcast(self) -> bool:
         result = False
         for signal in self.parent_signals:
@@ -95,6 +98,7 @@ class XOR(Neuron):
 
 
 class AND(Neuron):
+    __id__ = "AND"
     def should_broadcast(self) -> bool:
         for signal in self.parent_signals:
             if not signal:
@@ -103,6 +107,7 @@ class AND(Neuron):
 
 
 class OR(Neuron):
+    __id__ = "OR"
     def should_broadcast(self) -> bool:
         for signal in self.parent_signals:
             if signal:
@@ -111,6 +116,7 @@ class OR(Neuron):
 
 
 class NOR(Neuron):
+    __id__ = "NOR"
     def should_broadcast(self) -> bool:
         for signal in self.parent_signals:
             if signal:
@@ -119,6 +125,7 @@ class NOR(Neuron):
 
 
 class NAND(Neuron):
+    __id__ = "NAND"
     def should_broadcast(self) -> bool:
         for signal in self.parent_signals:
             if not signal:
@@ -127,6 +134,7 @@ class NAND(Neuron):
 
 
 class SameSpecies(Neuron):
+    __id__ = "SameSpecies"
     def should_broadcast(self):
         for target in self.parent_targets:
             if target is None:
@@ -139,6 +147,7 @@ class SameSpecies(Neuron):
 class GreaterPower(Neuron):
     """ Gets activated if ONE OF its targets have a greater power than the organism
     """
+    __id__ = "GreaterPower"
     def should_broadcast(self):
         for target in self.parent_targets:
             if target is None:
@@ -151,6 +160,7 @@ class GreaterPower(Neuron):
 class LessPower(Neuron):
     """ Gets activated if ONE OF its targets have a less power than the organism
     """
+    __id__ = "LessPower"
     def should_broadcast(self):
         for target in self.parent_targets:
             if target is None:
@@ -163,6 +173,7 @@ class LessPower(Neuron):
 class GreaterPowerByN(Neuron):
     def __init__(self, sim, org, n, outgoing_connections=None, parents=None):
         self.n = n
+        self.__id__ = "GreaterPowerBy" + str(n)
         if outgoing_connections is None:
             outgoing_connections = set()
         if parents is None:
@@ -180,6 +191,7 @@ class GreaterPowerByN(Neuron):
 
 class LessPowerByN(Neuron):
     def __init__(self, sim, org, n, outgoing_connections=None, parents=None):
+        self.__id__ = "LessPowerBy" + str(n)
         self.n = n
         if outgoing_connections is None:
             outgoing_connections = set()
@@ -199,6 +211,7 @@ class LessPowerByN(Neuron):
 class MoreKills(Neuron):
     """ Gets activated if ONE OF its targets has more kills than the organism
     """
+    __id__ = "MoreKills"
     def should_broadcast(self):
         for target in self.parent_targets:
             if target is None:
@@ -211,6 +224,7 @@ class MoreKills(Neuron):
 class FewerKills(Neuron):
     """ Gets activated if ONE OF its targets has fewer kills than the organism
     """
+    __id__ = "FewerKills"
     def should_broadcast(self):
         for target in self.parent_targets:
             if target is None:
@@ -227,6 +241,7 @@ class WithinNUnits(Neuron):
     """
     def __init__(self, sim, org, n, outgoing_connections=None, parents=None):
         self.n = n
+        self.__id__ = "Within" + str(n) + "Units"
         if outgoing_connections is None:
             outgoing_connections = set()
         if parents is None:

@@ -13,10 +13,12 @@ def fail_case(target):
 class Tests(unittest.TestCase):
     sim = sim.Simulation()
     org = organism.Organism(sim, 0, 0, power=10, representing_char='r')
+    org2 = organism.Organism(sim, 3, 3, power=3, representing_char='b')
 
     def reset(self):
         self.sim = sim.Simulation()
         self.org = organism.Organism(self.sim, 0, 0, power=10, representing_char='r')
+        self.org2 = organism.Organism(self.sim, 3, 3, power=3, representing_char='b')
 
     def test_neurons(self):
         sensor = sensors.Sensor(self.sim, self.org)
@@ -25,27 +27,27 @@ class Tests(unittest.TestCase):
         actuator.actuate = fail_case  # make sure it doesnt happen
 
         middle_xor = neurons.XOR(self.sim, self.org, outgoing_connections={actuator}, parents=[sensor, sensor2])
-        sensor.activate(self.org, True)
-        sensor2.activate(self.org, True)
+        sensor.activate(self.org2, True)
+        sensor2.activate(self.org2, True)
         sensor.outgoing_connections = set()
         sensor2.outgoing_connections = set()
 
         middle_and = neurons.AND(self.sim, self.org, outgoing_connections={actuator}, parents=[sensor, sensor2])
-        sensor.activate(self.org, True)
-        sensor2.activate(self.org, False)
+        sensor.activate(self.org2, True)
+        sensor2.activate(self.org2, False)
         sensor.outgoing_connections = set()
         sensor2.outgoing_connections = set()
 
         middle_or = neurons.OR(self.sim, self.org, outgoing_connections={actuator}, parents=[sensor, sensor2])
-        sensor.activate(self.org, False)
-        sensor2.activate(self.org, False)
+        sensor.activate(self.org2, False)
+        sensor2.activate(self.org2, False)
         sensor.outgoing_connections = set()
         sensor2.outgoing_connections = set()
 
         middle_nor = neurons.NOR(self.sim, self.org, outgoing_connections={actuator}, parents=[sensor, sensor2])
-        sensor.activate(self.org, True)
+        sensor.activate(self.org2, True)
         # we should just have another function in Sensor that is like activate(False) but also passes the target.
-        sensor2.activate(self.org, False)
+        sensor2.activate(self.org2, False)
         sensor.outgoing_connections = set()
         sensor2.outgoing_connections = set()
 
@@ -59,8 +61,8 @@ class Tests(unittest.TestCase):
         middle_xor2 = neurons.XOR(self.sim, self.org, parents=[middle_xor, middle_xor, middle_xor, middle_xor])
         middle_xor2.add_connection(actuator)
 
-        sensor.activate(self.org, False)
-        sensor2.activate(self.org, True)
+        sensor.activate(self.org2, False)
+        sensor2.activate(self.org2, True)
         sensor.outgoing_connections = set()
         sensor2.outgoing_connections = set()
 
@@ -68,7 +70,7 @@ class Tests(unittest.TestCase):
         self.reset()
         sensor = sensors.Sensor(self.sim, self.org)
         dumbass = organism.Organism(self.sim, 8, 8, power=10, representing_char='d')
-        neuron = neurons.Neuron(self.sim, self.org, parents=[sensor])
+        neuron = neurons.Direct(self.sim, self.org, parents=[sensor])
         actuator = actuators.TowardsActuator(self.sim, self.org)
         neuron.add_connection(actuator)
 
@@ -80,7 +82,7 @@ class Tests(unittest.TestCase):
         self.reset()
         sensor = sensors.Sensor(self.sim, self.org)
         dumbass = organism.Organism(self.sim, 8, 1, power=10, representing_char='d')
-        neuron = neurons.Neuron(self.sim, self.org, parents=[sensor])
+        neuron = neurons.Direct(self.sim, self.org, parents=[sensor])
         actuator = actuators.AwayActuator(self.sim, self.org)
         neuron.add_connection(actuator)
 
