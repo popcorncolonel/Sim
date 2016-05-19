@@ -2,8 +2,8 @@ from sim import Simulation
 import sys
 
 def main():
-    width = 14
-    height = 30
+    width = 35
+    height = 109
     if len(sys.argv) > 2:
         height = int(sys.argv[1])
         width = int(sys.argv[2])

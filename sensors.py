@@ -1,7 +1,4 @@
 """
-Can sense whether there is an organism immediately surrounding you,
-can compare the power of organisms,
-can look left,right,up,upright,downleft,...,
 can see how many organisms are at a location
 can see if you are the same representative character of any of these,
 TODO: add more sensors
@@ -42,34 +39,135 @@ class ProximitySensor(Sensor):
     """
     def get_target(self) -> object:
         from organism import Organism
-        nearby_objs = []
+        targets = []
         for dx, dy in itertools.product([-1,0,1], repeat=2):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, dx, dy):
                 if isinstance(obj, Organism) and obj != self.org:
-                    nearby_objs.append(obj)
-        if nearby_objs == []:
+                    targets.append(obj)
+        if targets == []:
             return None
         else:
             #  TODO: should we eventually return a list of organisms next to me?
             import random
-            target = random.choice(nearby_objs)
+            target = random.choice(targets)
             return target
 
 
 class RightSensor(Sensor):
     def get_target(self):
+        targets = []
         from organism import Organism
         for i in range(1, 15):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, i, 0):
                 if isinstance(obj, Organism):
-                    return obj
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
 
 
 class LeftSensor(Sensor):
     def get_target(self):
+        targets = []
         from organism import Organism
         for i in range(1, 15):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -i, 0):
                 if isinstance(obj, Organism):
-                    return obj
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
+
+
+class UpSensor(Sensor):
+    def get_target(self):
+        targets = []
+        from organism import Organism
+        for i in range(1, 15):
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0, i):
+                if isinstance(obj, Organism):
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
+
+
+class DownSensor(Sensor):
+    def get_target(self):
+        targets = []
+        from organism import Organism
+        for i in range(1, 15):
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0, -i):
+                if isinstance(obj, Organism):
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
+
+class UpRightSensor(Sensor):
+    def get_target(self):
+        targets = []
+        from organism import Organism
+        for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, i, j):
+                if isinstance(obj, Organism):
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
+
+
+class DownRightSensor(Sensor):
+    def get_target(self):
+        targets = []
+        from organism import Organism
+        for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, i, -j):
+                if isinstance(obj, Organism):
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
+
+
+class DownLeftSensor(Sensor):
+    def get_target(self):
+        targets = []
+        from organism import Organism
+        for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -i, -j):
+                if isinstance(obj, Organism):
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
+
+
+class UpLeftSensor(Sensor):
+    def get_target(self):
+        targets = []
+        from organism import Organism
+        for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -i, j):
+                if isinstance(obj, Organism):
+                    targets.append(obj)
+        import random
+        if targets == []:
+            return None
+        else:
+            return random.choice(targets)
 

@@ -45,7 +45,7 @@ class Neuron:
         """
         Invariant: there are no items in self.parent_signals that are None
         """
-        return all(self.parent_signals)
+        assert False
 
     def broadcast_if_ready(self):
         if not self.all_signals_received():  # wait for a response from all parents before saying something
@@ -77,6 +77,11 @@ class Neuron:
                 self.parent_signals[parent_index] = signal  # Assign target and signal
                 self.parent_targets[parent_index] = target  # target can be None - for example, if ProximityActuator doesn't see anyone around.
                 self.broadcast_if_ready()
+
+
+class Direct(Neuron):
+    def should_broadcast(self) -> bool:
+        return all(self.parent_signals)
 
 
 class XOR(Neuron):
