@@ -10,7 +10,7 @@ class Actuator:
         assert isinstance(sim, Simulation)
         assert isinstance(org, Organism)
         self.sim = sim
-        self.organism = org
+        self.org = org
 
     def actuate(self, target):
         """
@@ -19,8 +19,7 @@ class Actuator:
         """
         assert False  # this must be overwritten by the actuator
 
-    def activate(self, target=None, signal=None, parent=None):
-        assert signal is not None
+    def activate(self, target, signal, parent=None):
         if signal == False:
             return
         self.actuate(target)
@@ -30,8 +29,8 @@ class MoveActuator(Actuator):
     """
     Performs an action when it recieves a signal.
     """
-    def __init__(self, sim, organism, delta_x=0, delta_y=0):
-        super().__init__(sim, organism)
+    def __init__(self, sim, org, delta_x=0, delta_y=0):
+        super().__init__(sim, org)
         self.delta_x = delta_x
         self.delta_y = delta_y
 
@@ -39,12 +38,45 @@ class MoveActuator(Actuator):
         # TODO: turn this intervace into a TowardsActuator and an AwayActuator that
         #       takes in an argument (target is a list now!!!) and goes
         #       towards/away from something, using THESE moveactuators
-        self.sim[self.organism.x][self.organism.y].remove(self.organism)
-        self.organism.x += self.delta_x
-        self.organism.y += self.delta_y
-        self.organism.x = self.organism.x % self.sim.width
-        self.organism.y = self.organism.y % self.sim.height
-        self.sim[self.organism.x][self.organism.y].add(self.organism)
+        self.sim[self.org.x][self.org.y].remove(self.org)
+        self.org.x += self.delta_x
+        self.org.y += self.delta_y
+        self.org.x = self.org.x % self.sim.width
+        self.org.y = self.org.y % self.sim.height
+        self.sim[self.org.x][self.org.y].append(self.org)
+
+
+class TowardsActuator(MoveActuator):
+    def actuate(self, target):
+        assert target is not None
+        import math
+        if target.x == self.org.x:
+            self.delta_x = 0
+        else:
+            self.delta_x = math.copysign(1, target.x - self.org.x)  # if i am at (5,0) and target is at (7,0), we want to return 1.
+        if target.y == self.org.y:
+            self.delta_y = 0
+        else:
+            self.delta_y = math.copysign(1, target.y - self.org.y)  # if i am at (0,8) and target is at (0,10), we want to return 1.
+        self.delta_x = int(self.delta_x)
+        self.delta_y = int(self.delta_y)
+        super().actuate(target)
+
+class AwayActuator(MoveActuator):
+    def actuate(self, target):
+        assert target is not None
+        import math
+        if target.x == self.org.x:
+            self.delta_x = 0
+        else:
+            self.delta_x = math.copysign(1, -(target.x - self.org.x))  # if i am at (5,0) and target is at (7,0), we want to return -1.
+        if target.y == self.org.y:
+            self.delta_y = 0
+        else:
+            self.delta_y = math.copysign(1, -(target.y - self.org.y))  # if i am at (0,8) and target is at (0,10), we want to return -1.
+        self.delta_x = int(self.delta_x)
+        self.delta_y = int(self.delta_y)
+        super().actuate(target)
 
 
 class AttackActuator(Actuator):
@@ -57,14 +89,14 @@ class AttackActuator(Actuator):
         """
         if False:  # if they try to attack something that's more than one unit away
             return
-        prob_victory = self.organism.power / (self.organism.power + target.power)
+        prob_victory = self.org.power / (self.org.power + target.power)
         won_battle = sim_tools.bernoulli(prob_victory)
         if won_battle:
-            winner = self.organism
+            winner = self.org
             loser = target
         else:
             winner = target
-            loser = self.organism
+            loser = self.org
         self.sim.remove(loser)
         winner.kills += 1
         winner.hunger = 0
@@ -79,12 +111,16 @@ class MateActuator(Actuator):
         """ Returns the baby of self.organism and target, to-be-placed where they are """
         if False:  # if they try to mate with something that's more than 1 unit away
             return
-        power_avg = (target.power + self.organism.power) / 2
-        parent_coords = (self.organism.x, self.organism.y)
+        if self.org.representing_char != target.representing_char:
+            #  TODO: maybe allow orgs of different species to mate? just with unfavorable outcomes
+            #        (i.e. choose the min of the powers, not the avg)
+            return
+        power_avg = (target.power + self.org.power) / 2
+        parent_coords = (self.org.x, self.org.y)
         #  TODO: combine the sensors of this organism and the target
         my_char = sim_tools.bernoulli(0.5)
         if my_char:
-            char = self.organism.representing_char
+            char = self.org.representing_char
         else:
             char = target.representing_char
         baby = self.sim.spawn_new_life(coords=parent_coords, representing_char=char, power=power_avg)

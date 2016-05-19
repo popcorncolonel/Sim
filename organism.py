@@ -31,7 +31,6 @@ class Organism:
             self.power = power
         else:
             self.power = max(0, random.normalvariate(mu=5, sigma=2.5))
-        self.dead = False
         self.actuators = brain.Actuators(sim, self).list
         # self.sensors = brain.Sensors(sim, self).list
         from actuators import AttackActuator
@@ -75,9 +74,6 @@ class Organism:
         died_of_hunger = bernoulli(self.hunger / 5000)
         if died_of_hunger:
             self.sim.remove(self)
-
-    def kill(self):
-        self.dead = True
 
     def __str__(self):
         return self.representing_char
