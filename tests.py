@@ -11,12 +11,12 @@ def fail_case(target):
         raise Exception
 
 class Tests(unittest.TestCase):
-    sim = sim.Simulation()
+    sim = sim.Simulation(30, 30)
     org = organism.Organism(sim, 0, 0, power=10, representing_char='r')
     org2 = organism.Organism(sim, 3, 3, power=3, representing_char='b')
 
     def reset(self):
-        self.sim = sim.Simulation()
+        self.sim = sim.Simulation(30, 30)
         self.org = organism.Organism(self.sim, 0, 0, power=10, representing_char='r')
         self.org2 = organism.Organism(self.sim, 3, 3, power=3, representing_char='b')
 
