@@ -1,5 +1,6 @@
 import sys
 import uuid
+import time
 import brain
 import random
 import string
@@ -36,9 +37,14 @@ class Organism:
         else:
             self.power = max(0, random.normalvariate(mu=5, sigma=2.5))
         self.power = int(self.power)
-        self.sensors = brain.Sensors(sim, self).list
-        self.neuron_classes = brain.Neurons(sim, self).list
-        self.actuators = brain.Actuators(sim, self).list
+        self.start_time = time.time()
+        self.mate_timeout = self.start_time + 30
+        self.assign_genome()
+
+    def assign_genome(self):
+        self.sensors = brain.Sensors(self.sim, self).list
+        self.neuron_classes = brain.Neurons(self.sim, self).list
+        self.actuators = brain.Actuators(self.sim, self).list
 
         self.possible_parents = list(self.sensors)
         self.possible_connections = list(self.actuators)
@@ -49,9 +55,9 @@ class Organism:
         #                                  "parents": ["sensor": 0, "neuron": 2], # can be sensors or neurons, but NOT actuators
         #                                  "connections": ["actuator": 1, "neuron": 3"] } # can be actuators or neurons, but NOT sensors ]
         """ Neuron numbers are indices into the genome list. """
-        self.assign_genome()
+        self.assign_neurons()
 
-    def assign_genome(self):
+    def assign_neurons(self):
         num_neurons = random.randint(1, 7)
         num_parents = random.randint(1, 3)
         num_conns = random.randint(1, 4)
@@ -78,6 +84,12 @@ class Organism:
             self.possible_parents.append(neuron)
             self.possible_connections.insert(0, neuron)
 
+    def get_age(self):
+        return int(time.time() - self.start_time)
+
+    def able_to_mate(self) -> bool:
+        return time.time() > self.mate_timeout
+
     def update(self):
         """
         Updates the status of the organism within its simulation.
@@ -91,11 +103,14 @@ class Organism:
                 sensor.activate(None, signal=False)
         for neuron in self.neurons:
             neuron.reset()
-        #self.check_status()
+        self.check_status()
 
     def check_status(self):
-        died_of_hunger = bernoulli(self.hunger / 5000)
-        if died_of_hunger:
+        age_in_seconds = self.get_age()
+        if age_in_seconds < 1200:
+            return
+        died_of_old_age = bernoulli(age_in_seconds / 500000)
+        if died_of_old_age:
             self.sim.remove(self)
 
     def __str__(self):

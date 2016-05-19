@@ -1,5 +1,6 @@
 import sim_tools
 import random
+import time
 
 class Actuator:
     """ Only actuates on all organisms. "targets" can be False.
@@ -138,6 +139,8 @@ class MateActuator(Actuator):
             #  TODO: maybe allow orgs of different species to mate? just with unfavorable outcomes
             #        (i.e. choose the min of the powers, not the avg)
             return
+        if not self.org.able_to_mate() or not target.able_to_mate():
+            return
         power_avg = (target.power + self.org.power) / 2
         parent_coords = (self.org.x, self.org.y)
         #  TODO: combine the neurons of this organism and the target
@@ -147,5 +150,6 @@ class MateActuator(Actuator):
         else:
             char = target.representing_char
         baby = self.sim.spawn_new_life(coords=parent_coords, representing_char=char, power=power_avg)
+        self.org.mate_timeout = target.mate_timeout = time.time() + 30
         return baby
 
