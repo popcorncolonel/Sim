@@ -105,7 +105,7 @@ class Simulation:
         this_str += "  |  "
         this_str += "Max #kills: " + str(max(self.organisms, key=lambda x: x.kills).kills)
         this_str += "  |  "
-        this_str += "Max age: " + str(int(max(self.organisms, key=lambda x: x.start_time).start_time - self.sim_start_time))
+        this_str += "Max age: " + str(int(max(self.organisms, key=lambda x: x.get_age()).get_age()))
         this_str += '\n'
         return '\n' + this_str
 
