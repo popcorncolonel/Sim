@@ -4,8 +4,7 @@ import brain
 import random
 import string
 
-import neurons
-from sim_tools import bernoulli, clip, binomial
+from sim_tools import bernoulli, clip
 
 
 class Organism:
@@ -38,14 +37,46 @@ class Organism:
             self.power = max(0, random.normalvariate(mu=5, sigma=2.5))
         self.power = int(self.power)
         self.sensors = brain.Sensors(sim, self).list
+        self.neuron_classes = brain.Neurons(sim, self).list
         self.actuators = brain.Actuators(sim, self).list
 
+        self.possible_parents = list(self.sensors)
+        self.possible_connections = list(self.actuators)
+
+        self.neurons = []  # actual live instances of the neurons
         self.genome = []  # This should be dicts representing to what depth we connect stuff.
                                 # i.e. [ { "type": MoreKills,
         #                                  "parents": ["sensor": 0, "neuron": 2], # can be sensors or neurons, but NOT actuators
         #                                  "connections": ["actuator": 1, "neuron": 3"] } # can be actuators or neurons, but NOT sensors ]
         """ Neuron numbers are indices into the genome list. """
+        self.assign_genome()
 
+    def assign_genome(self):
+        num_neurons = random.randint(1, 7)
+        num_parents = random.randint(1, 3)
+        num_conns = random.randint(1, 4)
+
+        def assign_parents(neuron):
+            for _ in range(num_parents):
+                parent = random.choice(self.possible_parents)
+                neuron.add_parent(parent)
+                parent.add_connection(neuron)
+
+        def assign_conns(neuron):
+            for _ in range(num_conns):
+                conn = random.choice(self.possible_connections)
+                neuron.add_connection(conn)
+                conn.add_parent(neuron)
+
+        for _ in range(num_neurons):
+            neuron_class = random.choice(self.neuron_classes)
+            neuron = neuron_class(self.sim, self)
+            assign_parents(neuron)
+            assign_conns(neuron)
+            self.genome.append(neuron.to_dict(self.sensors, self.actuators))
+            self.neurons.append(neuron)
+            self.possible_parents.append(neuron)
+            self.possible_connections.insert(0, neuron)
 
     def update(self):
         """
@@ -58,8 +89,8 @@ class Organism:
                 sensor.activate(target, signal=True)
             else:
                 sensor.activate(None, signal=False)
-        for gate in self.genome:
-            gate.reset()
+        for neuron in self.neurons:
+            neuron.reset()
         #self.check_status()
 
     def check_status(self):

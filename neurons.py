@@ -79,6 +79,27 @@ class Neuron:
                 self.parent_targets[parent_index] = target  # target can be None - for example, if ProximityActuator doesn't see anyone around.
                 self.broadcast_if_ready()
 
+    def to_dict(self, sensor_list, actuator_list):
+        from sensors import Sensor
+        from actuators import Actuator
+        d = dict()
+        d['type'] = self.__id__
+        parent_list = list()
+        for parent in self.parents:
+            if isinstance(parent, Sensor):
+                parent_list.append({"sensor": sensor_list.index(parent)})
+            else:  # Then it's a Neuron
+                parent_list.append({"neuron": self.org.neurons.index(parent)})
+        d['parents'] = parent_list
+        conn_list = list()
+        for conn in self.outgoing_connections:
+            if isinstance(conn, Actuator):
+                conn_list.append({"actuator": actuator_list.index(conn)})
+            else:  # Then it's a Neuron
+                conn_list.append({"neuron": self.org.neurons.index(conn)})
+        d['connection'] = conn_list
+        return d
+
 
 class Direct(Neuron):
     __id__ = "Direct"
@@ -170,44 +191,6 @@ class LessPower(Neuron):
         return False
 
 
-class GreaterPowerByN(Neuron):
-    def __init__(self, sim, org, n, outgoing_connections=None, parents=None):
-        self.n = n
-        self.__id__ = "GreaterPowerBy" + str(n)
-        if outgoing_connections is None:
-            outgoing_connections = set()
-        if parents is None:
-            parents = []
-        super().__init__(sim, org, outgoing_connections, parents)
-
-    def should_broadcast(self):
-        for target in self.parent_targets:
-            if target is None:
-                continue
-            if target.power > self.org.power and target.power >= self.org.power + self.n:
-                return True
-        return False
-
-
-class LessPowerByN(Neuron):
-    def __init__(self, sim, org, n, outgoing_connections=None, parents=None):
-        self.__id__ = "LessPowerBy" + str(n)
-        self.n = n
-        if outgoing_connections is None:
-            outgoing_connections = set()
-        if parents is None:
-            parents = []
-        super().__init__(sim, org, outgoing_connections, parents)
-
-    def should_broadcast(self):
-        for target in self.parent_targets:
-            if target is None:
-                continue
-            if target.power < self.org.power and target.power <= self.org.power + self.n:
-                return True
-        return False
-
-
 class MoreKills(Neuron):
     """ Gets activated if ONE OF its targets has more kills than the organism
     """
@@ -234,27 +217,47 @@ class FewerKills(Neuron):
         return False
 
 
-class WithinNUnits(Neuron):
+def GreaterPowerByN(n):
+    class C(Neuron):
+        __id__ = "GreaterPowerBy" + str(n)
+        def should_broadcast(self):
+            for target in self.parent_targets:
+                if target is None:
+                    continue
+                if target.power > self.org.power and target.power >= self.org.power + n:
+                    return True
+            return False
+    return C
+
+
+def LessPowerByN(n):
+    class C(Neuron):
+        __id__ = "LessPowerBy" + str(n)
+        def should_broadcast(self):
+            for target in self.parent_targets:
+                if target is None:
+                    continue
+                if target.power < self.org.power and target.power <= self.org.power + n:
+                    return True
+            return False
+    return C
+
+
+def WithinNUnits(n):
     """ Gets activated if ONE OF its targets is within n units of the organism
         (for example, for n=2, things that are 2 units away return True, but 3 return False)
         Does not work around corners or borders of the map.
     """
-    def __init__(self, sim, org, n, outgoing_connections=None, parents=None):
-        self.n = n
-        self.__id__ = "Within" + str(n) + "Units"
-        if outgoing_connections is None:
-            outgoing_connections = set()
-        if parents is None:
-            parents = []
-        super().__init__(sim, org, outgoing_connections, parents)
-
-    def should_broadcast(self):
-        for target in self.parent_targets:
-            if target is None:
-                continue
-            if sim_tools.is_n_units_away((self.org.x, self.org.y), (target.x, target.y), self.n):
-                return True
-        return False
+    class C(Neuron):
+        __id__ = "Within" + str(n) + "Units"
+        def should_broadcast(self):
+            for target in self.parent_targets:
+                if target is None:
+                    continue
+                if sim_tools.is_n_units_away((self.org.x, self.org.y), (target.x, target.y), n):
+                    return True
+            return False
+    return C
 
 
 

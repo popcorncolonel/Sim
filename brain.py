@@ -40,7 +40,7 @@ class Actuators:
         ]
 
 
-class MiddleNeurons:
+class Neurons:
     def __init__(self, sim, org):
         from sim import Simulation
         from organism import Organism
@@ -48,30 +48,30 @@ class MiddleNeurons:
         assert isinstance(org, Organism)
 
         self.list = [
-            neurons.Direct(sim, org),
-            neurons.AND(sim, org),
-            neurons.NAND(sim, org),
-            neurons.NOR(sim, org),
-            neurons.OR(sim, org),
-            neurons.XOR(sim, org),
-            neurons.SameSpecies(sim, org),
-            neurons.GreaterPower(sim, org),
-            neurons.LessPower(sim, org),
-            neurons.MoreKills(sim, org),
-            neurons.FewerKills(sim, org),
+            neurons.Direct,
+            neurons.AND,
+            neurons.NAND,
+            neurons.NOR,
+            neurons.OR,
+            neurons.XOR,
+            neurons.SameSpecies,
+            neurons.GreaterPower,
+            neurons.LessPower,
+            neurons.MoreKills,
+            neurons.FewerKills,
 
-            neurons.GreaterPowerByN(sim, org, 2),
-            neurons.LessPowerByN(sim, org, 2),
-            neurons.WithinNUnits(sim, org, 2),
-            neurons.GreaterPowerByN(sim, org, 3),
-            neurons.LessPowerByN(sim, org, 3),
-            neurons.WithinNUnits(sim, org, 3),
-            neurons.GreaterPowerByN(sim, org, 4),
-            neurons.LessPowerByN(sim, org, 4),
-            neurons.WithinNUnits(sim, org, 4),
-            neurons.GreaterPowerByN(sim, org, 5),
-            neurons.LessPowerByN(sim, org, 5),
-            neurons.WithinNUnits(sim, org, 5),
+            neurons.GreaterPowerByN(2),
+            neurons.LessPowerByN(2),
+            neurons.WithinNUnits(2),
+            neurons.GreaterPowerByN(3),
+            neurons.LessPowerByN(3),
+            neurons.WithinNUnits(3),
+            neurons.GreaterPowerByN(4),
+            neurons.LessPowerByN(4),
+            neurons.WithinNUnits(4),
+            neurons.GreaterPowerByN(5),
+            neurons.LessPowerByN(5),
+            neurons.WithinNUnits(5),
         ]
 
 

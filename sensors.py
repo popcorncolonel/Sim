@@ -30,6 +30,7 @@ class Sensor:
         """
         # Activates with False if it shouldn't activate. Otherwise, "target" is an Organism. (for now)
         for conn in self.outgoing_connections:
+            assert target is not self.org
             conn.activate(target, signal, parent=self)
 
 
@@ -42,7 +43,7 @@ class ProximitySensor(Sensor):
         targets = []
         for dx, dy in itertools.product([-1,0,1], repeat=2):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, dx, dy):
-                if isinstance(obj, Organism) and obj != self.org:
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         if targets == []:
             return None
@@ -59,7 +60,7 @@ class RightSensor(Sensor):
         from organism import Organism
         for i in range(1, 15):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, i, 0):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:
@@ -74,7 +75,7 @@ class LeftSensor(Sensor):
         from organism import Organism
         for i in range(1, 15):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -i, 0):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:
@@ -89,7 +90,7 @@ class UpSensor(Sensor):
         from organism import Organism
         for i in range(1, 15):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0, i):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:
@@ -104,7 +105,7 @@ class DownSensor(Sensor):
         from organism import Organism
         for i in range(1, 15):
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0, -i):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:
@@ -118,7 +119,7 @@ class UpRightSensor(Sensor):
         from organism import Organism
         for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, i, j):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:
@@ -133,7 +134,7 @@ class DownRightSensor(Sensor):
         from organism import Organism
         for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, i, -j):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:
@@ -148,7 +149,7 @@ class DownLeftSensor(Sensor):
         from organism import Organism
         for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -i, -j):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:
@@ -163,7 +164,7 @@ class UpLeftSensor(Sensor):
         from organism import Organism
         for i, j in [(i,j) for i in range(1, 15) for j in range(1, 15)]:
             for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -i, j):
-                if isinstance(obj, Organism):
+                if isinstance(obj, Organism) and obj is not self.org:
                     targets.append(obj)
         import random
         if targets == []:

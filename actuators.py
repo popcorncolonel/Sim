@@ -11,6 +11,10 @@ class Actuator:
         assert isinstance(org, Organism)
         self.sim = sim
         self.org = org
+        self.parents = set()
+
+    def add_parent(self, parent):
+        self.parents.add(parent)
 
     def actuate(self, target):
         """
