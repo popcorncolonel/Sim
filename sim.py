@@ -67,7 +67,7 @@ class Simulation:
             self.print_to_screen()
             time.sleep(0.10)
 
-    def spawn_new_life(self, coords=None, representing_char=None, power=None):
+    def spawn_new_life(self, coords=None, representing_char=None, power=None, parents=None):
         """ Creates a new organism and adds it to the simulation. """
         if not coords:
             x = random.randint(0, self.width - 1)
@@ -82,7 +82,10 @@ class Simulation:
         if power is not None:
             power = random.normalvariate(power, 1.0)
             power = int(power)
-        org = Organism(self, x, y, representing_char=representing_char, power=power)
+        if not parents:
+            org = Organism(self, x, y, representing_char=representing_char, power=power)
+        else:
+            org = Organism(self, x, y, representing_char=representing_char, power=power, parent1=parents[0], parent2=parents[0])
         #self.add(org)
         self.baby_list.append(org)
         return org

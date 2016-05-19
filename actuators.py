@@ -149,7 +149,8 @@ class MateActuator(Actuator):
             char = self.org.representing_char
         else:
             char = target.representing_char
-        baby = self.sim.spawn_new_life(coords=parent_coords, representing_char=char, power=power_avg)
+        baby = self.sim.spawn_new_life(coords=parent_coords, representing_char=char,
+                                       power=power_avg, parents=(self.org, target))
         self.org.mate_timeout = target.mate_timeout = time.time() + 30
         return baby
 

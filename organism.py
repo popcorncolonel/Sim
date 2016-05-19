@@ -15,7 +15,7 @@ class Organism:
     """
     hash = str(uuid.uuid4())
 
-    def __init__(self, sim, x, y, power=None, representing_char=None):
+    def __init__(self, sim, x, y, power=None, representing_char=None, parent1=None, parent2=None):
         """
         :representing_char: What's going to display on the board. Has to be one char.
         """
@@ -39,7 +39,43 @@ class Organism:
         self.power = int(self.power)
         self.start_time = time.time()
         self.mate_timeout = self.start_time + 30
-        self.assign_genome()
+        if not parent1 and not parent2:
+            self.assign_genome()
+        else:
+            assert parent1 and parent2
+            self.combine_genomes(parent1, parent2)
+
+    def combine_genomes(self, parent1, parent2):
+        self.sensors = brain.Sensors(self.sim, self).list
+        self.neuron_classes = brain.Neurons(self.sim, self).list
+        self.actuators = brain.Actuators(self.sim, self).list
+
+        longest_genome = max(parent1.genome, parent2.genome, key=lambda x: len(x))
+        self.copy_genome(longest_genome)
+        # TODO: add randomness (randomly sometimes add neurons, or mess up existing ones
+        # TODO: combine both genomes!
+        # TODO: detect duplicate connections (like we don't want a sensor hooked up to an actuator twice)
+
+    def copy_genome(self, genome):
+        self.genome = genome
+        self.neurons = []
+        for neuron in genome:
+            neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron['type']]
+            assert len(neuron_classes) == 1
+            neuron = neuron_classes[0](self.sim, self)
+            self.neurons.append(neuron)
+            for parent_type, index in neuron['parents'].items():
+                if parent_type == 'sensor':
+                    neuron.add_parent(self.sensors[index])
+                else:
+                    assert parent_type == 'neuron'
+                    neuron.add_parent(self.neurons[index])
+            for conn_type, index in neuron['connections'].items():
+                if conn_type == 'actuator':
+                    neuron.add_parent(self.actuators[index])
+                else:
+                    assert conn_type == 'neuron'
+                    neuron.add_parent(self.neurons[index])
 
     def assign_genome(self):
         self.sensors = brain.Sensors(self.sim, self).list
