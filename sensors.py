@@ -1,7 +1,7 @@
 """
-can see how many organisms are at a location
-can see if you are the same representative character of any of these,
-TODO: add more sensors
+TODO: Constant signal (always return True),
+nearest organism (returns None iff self.org is the only org,
+bern(0.5) signal
 """
 import itertools
 

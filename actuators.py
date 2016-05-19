@@ -23,10 +23,19 @@ class Actuator:
         """
         assert False  # this must be overwritten by the actuator
 
+    def default(self):
+        """
+        What gets called if target == None
+        """
+        return
+
     def activate(self, target, signal, parent=None):
         if signal == False:
             return
-        self.actuate(target)
+        if target is not None:
+            self.actuate(target)
+        else:
+            self.default()
 
 
 class MoveActuator(Actuator):
@@ -39,9 +48,6 @@ class MoveActuator(Actuator):
         self.delta_y = delta_y
 
     def actuate(self, target) -> None:
-        # TODO: turn this intervace into a TowardsActuator and an AwayActuator that
-        #       takes in an argument (target is a list now!!!) and goes
-        #       towards/away from something, using THESE moveactuators
         self.sim[self.org.x][self.org.y].remove(self.org)
         self.org.x += self.delta_x
         self.org.y += self.delta_y
@@ -51,6 +57,12 @@ class MoveActuator(Actuator):
 
 
 class TowardsActuator(MoveActuator):
+    def default(self):
+        # If target is None, move in a random direction
+        self.delta_x = random.choice([-1, 0, 1])
+        self.delta_y = random.choice([-1, 0, 1])
+        super().actuate(None)
+
     def actuate(self, target):
         assert target is not None
         import math
@@ -67,6 +79,12 @@ class TowardsActuator(MoveActuator):
         super().actuate(target)
 
 class AwayActuator(MoveActuator):
+    def default(self):
+        # If target is None, move in a random direction
+        self.delta_x = random.choice([-1, 0, 1])
+        self.delta_y = random.choice([-1, 0, 1])
+        super().actuate(None)
+
     def actuate(self, target):
         assert target is not None
         import math
@@ -122,7 +140,7 @@ class MateActuator(Actuator):
             return
         power_avg = (target.power + self.org.power) / 2
         parent_coords = (self.org.x, self.org.y)
-        #  TODO: combine the sensors of this organism and the target
+        #  TODO: combine the neurons of this organism and the target
         my_char = sim_tools.bernoulli(0.5)
         if my_char:
             char = self.org.representing_char
@@ -130,3 +148,4 @@ class MateActuator(Actuator):
             char = target.representing_char
         baby = self.sim.spawn_new_life(coords=parent_coords, representing_char=char, power=power_avg)
         return baby
+

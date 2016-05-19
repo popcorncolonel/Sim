@@ -1,13 +1,12 @@
 import random
 import time
-from copy import deepcopy
 
 from organism import Organism
 from sim_tools import bernoulli, Reprinter
 
 
 class Simulation:
-    def __init__(self, height=35, width=109):
+    def __init__(self, height, width):
         self.reprinter = Reprinter()
         self.width = height  # Internally not the same but who cares. just think about it as if x += 1 means "go right"
         self.height = width
@@ -19,6 +18,7 @@ class Simulation:
                 row.append([' '])
         self.organisms = set()  # Maps coords to organisms.
         self.kill_list = []
+        self.baby_list = []
 
     def get_objs_at_pos(self, x, y, dx, dy) -> list:
         """
@@ -29,10 +29,6 @@ class Simulation:
         resulting_x = (x + dx) % self.width
         resulting_y = (y + dy) % self.height
         return self[resulting_x][resulting_y]
-
-    def battle(self, org1: Organism, org2: Organism) -> Organism:
-        """ Returns the victor of the battle. Removes the loser from the grid. """
-        pass  # TODO: make this more complex. only battle if the orgs want to battle.
 
     def add(self, organism: Organism):
         self.organisms.add(organism)
@@ -45,16 +41,22 @@ class Simulation:
                 self[organism.x][organism.y].remove(organism)
         self.kill_list = []
 
+    def clean_baby_list(self):
+        for organism in self.baby_list:
+            if organism not in self.organisms:
+                self.organisms.add(organism)
+                self[organism.x][organism.y].append(organism)
+        self.baby_list = []
+
     def remove(self, organism: Organism):
         self.kill_list.append(organism)
 
-
-
     def timestep(self):
+        self.clean_kill_list()
+        self.clean_baby_list()
         for organism in self.organisms:
             organism.update()
-        self.clean_kill_list()
-        if len(self.organisms) < 10 and bernoulli(0.1):
+        if len(self.organisms) < (self.width + self.height) / 5 and bernoulli(0.1):
             self.spawn_new_life()
 
     def run(self):
@@ -62,7 +64,7 @@ class Simulation:
         while True:
             self.timestep()
             self.print_to_screen()
-            time.sleep(0.15)
+            time.sleep(0.10)
 
     def spawn_new_life(self, coords=None, representing_char=None, power=None):
         """ Creates a new organism and adds it to the simulation. """
@@ -77,10 +79,11 @@ class Simulation:
             x, y = coords
 
         if power is not None:
-            assert type(power) is int
             power = random.normalvariate(power, 1.0)
+            power = int(power)
         org = Organism(self, x, y, representing_char=representing_char, power=power)
-        self.add(org)
+        #self.add(org)
+        self.baby_list.append(org)
         return org
 
     def print_to_screen(self):
@@ -94,7 +97,12 @@ class Simulation:
             rowstr += '|'
             rows.append(rowstr)
         this_str = '\n'.join(rows)
-        return '\n' + this_str + '\n ' + '_' * self.height
+        this_str += '\n ' + '_' * self.height
+        this_str += '\n' + "Organisms: " + str(len(self.organisms))
+        this_str += "  |  "
+        this_str += "Max power: " + str(max(self.organisms, key=lambda x: x.power).power)
+        this_str += '\n'
+        return '\n' + this_str
 
     # sim[5]
     def __getitem__(self, key: int) -> list:
