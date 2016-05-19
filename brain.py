@@ -3,8 +3,6 @@ from actuators import MoveActuator, AttackActuator, MateActuator
 from neurons import Neuron
 
 
-
-
 class Sensors:
     def __init__(self, sim, org):
         super().__init__()

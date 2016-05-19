@@ -18,6 +18,16 @@ def binomial(n: int, p: float) -> list:
     return result
 
 
+def is_n_units_away(pos1: tuple, pos2: tuple, n: int):
+    """
+    Returns True if pos1 is <= n units away from pos2
+    """
+    # Chebyshev distance metric
+    max_dist = max(abs(pos1[0] - pos2[0]),
+                   abs(pos1[1] - pos2[1]))
+    return max_dist <= n
+
+
 def clip(lo, x, hi=None):
     """ lo < hi """
     if hi == None:

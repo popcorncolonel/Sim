@@ -22,7 +22,6 @@ class Simulation:
 
     def get_objs_at_pos(self, x, y, dx, dy) -> list:
         """
-
         :param x,y: location of the thing
         :param dx,dy: the dx,dy such that we are looking for (x + dx, y + dy) mod (width, height)
         :return: list of objects at that location
@@ -42,7 +41,6 @@ class Simulation:
         for organism in self.kill_list:
             if organism in self.organisms:
                 self.organisms.remove(organism)
-                organism.kill()
                 # self[organism.x][organism.y][self[organism.x][organism.y].index(organism)] = 'X'
                 self[organism.x][organism.y].remove(organism)
         self.kill_list = []
@@ -50,18 +48,14 @@ class Simulation:
     def remove(self, organism: Organism):
         self.kill_list.append(organism)
 
+
+
     def timestep(self):
         for organism in self.organisms:
             organism.update()
         self.clean_kill_list()
         if bernoulli(0.1):
             self.spawn_new_life()
-
-    def is_one_unit_away(self, pos1: tuple, pos2: tuple) -> bool:
-        """
-         Doesn't handle edge cases (pos1 = on left border, pos2 = on right border)
-        """
-        return abs(pos1[0] - pos2[0]) <= 1 and abs(pos1[0] - pos2[0]) <= 1
 
     def run(self):
         """ Infinitely loops. Could return a thread at some point but I don't see the need now. """
@@ -82,6 +76,8 @@ class Simulation:
             assert len(coords) == 2
             x, y = coords
 
+        if power is not None:
+            power = random.normalvariate(power, 1.0)
         org = Organism(self, x, y, representing_char=representing_char, power=power)
         self.add(org)
         return org

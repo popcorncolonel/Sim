@@ -67,11 +67,11 @@ class AwayActuator(MoveActuator):
         assert target is not None
         import math
         if target.x == self.org.x:
-            self.delta_x = 0
+            self.delta_x = random.choice([-1, 1])
         else:
             self.delta_x = math.copysign(1, -(target.x - self.org.x))  # if i am at (5,0) and target is at (7,0), we want to return -1.
         if target.y == self.org.y:
-            self.delta_y = 0
+            self.delta_y = random.choice([-1, 1])
         else:
             self.delta_y = math.copysign(1, -(target.y - self.org.y))  # if i am at (0,8) and target is at (0,10), we want to return -1.
         self.delta_x = int(self.delta_x)
@@ -87,8 +87,9 @@ class AttackActuator(Actuator):
         """
         Only attack if Check if the target(s) is(are) 1 unit away
         """
-        if False:  # if they try to attack something that's more than one unit away
-            return
+        if not sim_tools.is_n_units_away((self.org.x, self.org.y), (target.x, target.y), 1):
+            return  # if they try to attack something that's more than one unit away
+        self.org.power += 1  # reward for being aggressive
         prob_victory = self.org.power / (self.org.power + target.power)
         won_battle = sim_tools.bernoulli(prob_victory)
         if won_battle:
@@ -100,7 +101,7 @@ class AttackActuator(Actuator):
         self.sim.remove(loser)
         winner.kills += 1
         winner.hunger = 0
-        winner.power += 1
+        winner.power += 1  # reward for winning
 
 
 class MateActuator(Actuator):
@@ -109,8 +110,8 @@ class MateActuator(Actuator):
     """
     def actuate(self, target):
         """ Returns the baby of self.organism and target, to-be-placed where they are """
-        if False:  # if they try to mate with something that's more than 1 unit away
-            return
+        if not sim_tools.is_n_units_away((self.org.x, self.org.y), (target.x, target.y), 1):
+            return  # if they try to mate with something that's more than 1 unit away
         if self.org.representing_char != target.representing_char:
             #  TODO: maybe allow orgs of different species to mate? just with unfavorable outcomes
             #        (i.e. choose the min of the powers, not the avg)

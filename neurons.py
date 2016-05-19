@@ -1,4 +1,6 @@
 import random
+import sim_tools
+
 
 class Neuron:
     def __init__(self, sim, org, outgoing_connections=None, parents=None):
@@ -29,6 +31,7 @@ class Neuron:
     def add_parent(self, parent):
         self.parents.append(parent)
         self.parent_signals.append(None)
+        self.parent_targets.append(None)
 
     def broadcast(self, target, signal):
         for conn in self.outgoing_connections:
@@ -70,6 +73,7 @@ class Neuron:
         assert signal is not None
         for parent_index, other_parent in enumerate(self.parents):
             if parent == other_parent:
+                assert target is not self.org
                 self.parent_signals[parent_index] = signal  # Assign target and signal
                 self.parent_targets[parent_index] = target  # target can be None - for example, if ProximityActuator doesn't see anyone around.
                 self.broadcast_if_ready()
@@ -188,7 +192,7 @@ class LessPowerByN(Neuron):
 
 
 class MoreKills(Neuron):
-    """ Gets activated if ONE OF its targets have a less power than the organism
+    """ Gets activated if ONE OF its targets has more kills than the organism
     """
     def should_broadcast(self):
         for target in self.parent_targets:
@@ -200,13 +204,35 @@ class MoreKills(Neuron):
 
 
 class FewerKills(Neuron):
-    """ Gets activated if ONE OF its targets have a less power than the organism
+    """ Gets activated if ONE OF its targets has fewer kills than the organism
     """
     def should_broadcast(self):
         for target in self.parent_targets:
             if target is None:
                 continue
             if target.kills < self.org.kills:
+                return True
+        return False
+
+
+class WithinNUnits(Neuron):
+    """ Gets activated if ONE OF its targets is within n units of the organism
+        (for example, for n=2, things that are 2 units away return True, but 3 return False)
+        Does not work around corners or borders of the map.
+    """
+    def __init__(self, sim, org, n, outgoing_connections=None, parents=None):
+        self.n = n
+        if outgoing_connections is None:
+            outgoing_connections = set()
+        if parents is None:
+            parents = []
+        super().__init__(sim, org, outgoing_connections, parents)
+
+    def should_broadcast(self):
+        for target in self.parent_targets:
+            if target is None:
+                continue
+            if sim_tools.is_n_units_away((self.org.x, self.org.y), (target.x, target.y), self.n):
                 return True
         return False
 

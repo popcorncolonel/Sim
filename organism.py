@@ -25,12 +25,12 @@ class Organism:
         self.sim[x][y].append(self)
         self.hash = str(uuid.uuid4())
         self.kills = 0
-        self.hunger = 0
 
         if power:
             self.power = power
         else:
             self.power = max(0, random.normalvariate(mu=5, sigma=2.5))
+        self.power = int(self.power)
         self.actuators = brain.Actuators(sim, self).list
         # self.sensors = brain.Sensors(sim, self).list
         from actuators import AttackActuator
@@ -59,7 +59,6 @@ class Organism:
         Updates the status of the organism within its simulation.
         Fires off all the sensors, which in turn will (or may) fire the actuators.
         """
-        self.hunger += 1
         for sensor in self.sensors:
             target = sensor.get_target()
             if target is not None:

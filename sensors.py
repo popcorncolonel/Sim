@@ -6,6 +6,7 @@ can see how many organisms are at a location
 can see if you are the same representative character of any of these,
 TODO: add more sensors
 """
+import itertools
 
 class Sensor:
     def __init__(self, sim, org, outgoing_connections=None):
@@ -40,36 +41,35 @@ class ProximitySensor(Sensor):
     Activates when the organism is right next to another organism
     """
     def get_target(self) -> object:
-        """
-        :return: False or a target
-        """
         from organism import Organism
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 1,0):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 1,1):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0,1):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -1,0):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 1,-1):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -1,1):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0,-1):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -1,-1):
-            if isinstance(obj, Organism):
-                return obj
-        for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, 0,0):  #  Check if anything is in the current position
-            if isinstance(obj, Organism) and obj != self.org:
-                return obj
-        return None
+        nearby_objs = []
+        for dx, dy in itertools.product([-1,0,1], repeat=2):
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, dx, dy):
+                if isinstance(obj, Organism) and obj != self.org:
+                    nearby_objs.append(obj)
+        if nearby_objs == []:
+            return None
+        else:
+            #  TODO: should we eventually return a list of organisms next to me?
+            import random
+            target = random.choice(nearby_objs)
+            return target
+
+
+class RightSensor(Sensor):
+    def get_target(self):
+        from organism import Organism
+        for i in range(1, 15):
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, i, 0):
+                if isinstance(obj, Organism):
+                    return obj
+
+
+class LeftSensor(Sensor):
+    def get_target(self):
+        from organism import Organism
+        for i in range(1, 15):
+            for obj in self.sim.get_objs_at_pos(self.org.x, self.org.y, -i, 0):
+                if isinstance(obj, Organism):
+                    return obj
 
