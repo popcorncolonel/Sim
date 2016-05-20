@@ -143,7 +143,6 @@ class MateActuator(Actuator):
             return
         power_avg = (target.power + self.org.power) / 2
         parent_coords = (self.org.x, self.org.y)
-        #  TODO: combine the neurons of this organism and the target
         my_char = sim_tools.bernoulli(0.5)
         if my_char:
             char = self.org.representing_char

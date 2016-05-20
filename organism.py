@@ -60,22 +60,24 @@ class Organism:
         self.genome = genome
         self.neurons = []
         for neuron_dict in genome:
-            neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron['type']]
+            neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron_dict['type']]
             assert len(neuron_classes) == 1
             neuron = neuron_classes[0](self.sim, self)
             self.neurons.append(neuron)
-            for parent_type, index in neuron_dict['parents'].items():
-                if parent_type == 'sensor':
-                    neuron.add_parent(self.sensors[index])
-                else:
-                    assert parent_type == 'neuron'
-                    neuron.add_parent(self.neurons[index])
-            for conn_type, index in neuron_dict['connections'].items():
-                if conn_type == 'actuator':
-                    neuron.add_parent(self.actuators[index])
-                else:
-                    assert conn_type == 'neuron'
-                    neuron.add_parent(self.neurons[index])
+            for parent_dict in neuron_dict['parents']:
+                for parent_type, index in parent_dict.items():
+                    if parent_type == 'sensor':
+                        neuron.add_parent(self.sensors[index])
+                    else:
+                        assert parent_type == 'neuron'
+                        neuron.add_parent(self.neurons[index])
+            for conn_dict in neuron_dict['connections']:
+                for conn_type, index in conn_dict.items():
+                    if conn_type == 'actuator':
+                        neuron.add_parent(self.actuators[index])
+                    else:
+                        assert conn_type == 'neuron'
+                        neuron.add_parent(self.neurons[index])
 
     def assign_genome(self):
         self.sensors = brain.Sensors(self.sim, self).list
@@ -119,6 +121,11 @@ class Organism:
             self.neurons.append(neuron)
             self.possible_parents.append(neuron)
             self.possible_connections.insert(0, neuron)
+
+    def mutate(self):
+        # add a random neuron to the genome, or don't
+        if bernoulli(0.3):
+            pass
 
     def get_age(self):
         return int(time.time() - self.start_time)

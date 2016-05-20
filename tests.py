@@ -101,4 +101,6 @@ class Tests(unittest.TestCase):
         middle = neurons.SameSpecies(self.sim, self.org, outgoing_connections={actuator}, parents=[sensor])
         sensor.activate(dumbass, True)
 
-
+    def test_mating(self):
+        dumbass = organism.Organism(self.sim, 1, 1, parent1=self.org, parent2=self.org)
+        print(dumbass.genome)

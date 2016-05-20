@@ -97,7 +97,7 @@ class Neuron:
                 conn_list.append({"actuator": actuator_list.index(conn)})
             else:  # Then it's a Neuron
                 conn_list.append({"neuron": self.org.neurons.index(conn)})
-        d['connection'] = conn_list
+        d['connections'] = conn_list
         return d
 
 
