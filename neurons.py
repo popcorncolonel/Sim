@@ -82,6 +82,11 @@ class Neuron:
                 self.broadcast_if_ready()
 
     def to_dict(self, sensor_list, actuator_list):
+        # Example:
+        # [ { "type": MoreKills,
+        #     "guid": <guid>,
+        #     "parents": ["sensor": 0, "neuron": <guid>], # can be sensors or neurons, but NOT actuators
+        #     "connections": ["actuator": 1, "neuron": <guid>"] } ] # can be actuators or neurons, but NOT sensors
         from sensors import Sensor
         from actuators import Actuator
         d = dict()
