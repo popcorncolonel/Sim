@@ -86,19 +86,22 @@ class Neuron:
         from actuators import Actuator
         d = dict()
         d['type'] = self.__id__
+        d['guid'] = self.guid
         parent_list = list()
         for parent in self.parents:
             if isinstance(parent, Sensor):
                 parent_list.append({"sensor": sensor_list.index(parent)})
             else:  # Then it's a Neuron
-                parent_list.append({"neuron": self.org.neurons.index(parent)})
+                assert isinstance(parent, Neuron)
+                parent_list.append({"neuron": parent.guid})
         d['parents'] = parent_list
         conn_list = list()
         for conn in self.outgoing_connections:
             if isinstance(conn, Actuator):
                 conn_list.append({"actuator": actuator_list.index(conn)})
             else:  # Then it's a Neuron
-                conn_list.append({"neuron": self.org.neurons.index(conn)})
+                assert isinstance(conn, Neuron)
+                conn_list.append({"neuron": conn.guid})
         d['connections'] = conn_list
         return d
 
