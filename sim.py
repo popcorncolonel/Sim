@@ -16,7 +16,7 @@ class Simulation:
         for row in self._grid:
             for j in range(width):
                 row.append([' '])
-        self.organisms = set()  # Maps coords to organisms.
+        self.organisms = set()
         self.kill_list = []
         self.baby_list = []
         self.sim_start_time = time.time()
@@ -38,7 +38,6 @@ class Simulation:
         for organism in self.kill_list:
             if organism in self.organisms:
                 self.organisms.remove(organism)
-                # self[organism.x][organism.y][self[organism.x][organism.y].index(organism)] = 'X'
                 self[organism.x][organism.y].remove(organism)
         self.kill_list = []
 
@@ -86,7 +85,6 @@ class Simulation:
             org = Organism(self, x, y, representing_char=representing_char, power=power)
         else:
             org = Organism(self, x, y, representing_char=representing_char, power=power, parent1=parents[0], parent2=parents[0])
-        #self.add(org)
         self.baby_list.append(org)
         return org
 

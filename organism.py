@@ -22,7 +22,6 @@ class Organism:
         self.sim = sim
         self.x = x
         self.y = y
-        self.sim[x][y].append(self)
         self.hash = str(uuid.uuid4())
         self.kills = 0
         if representing_char:
