@@ -1,3 +1,8 @@
+"""
+TODO: maybe don't include all neurons? Maybe the brain would become too big for its own good
+TODO: make actuators only be able to act once per turn. perhaps by vote of the neurons (target with the most activates gets actuated on)
+"""
+
 import uuid
 import random
 import sim_tools

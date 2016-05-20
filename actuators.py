@@ -1,3 +1,6 @@
+"""
+TODO: left, right, up, down actuators.
+"""
 import sim_tools
 import random
 import time
