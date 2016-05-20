@@ -108,41 +108,70 @@ class Organism:
         # TODO: combine both genomes!
         # TODO: detect duplicate connections (like we don't want a sensor hooked up to an actuator twice)
 
-    def copy_neuron(self, neuron_dict, prev_genome):
+    def duplicate_all_neurons(self, genome):
         """
-        Takes a neuron dict from a different genome
+        Creates neurons and copies their guids from the genomes, but does not add any connections
         """
-        neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron_dict['type']]
-        assert len(neuron_classes) == 1
-        neuron = neuron_classes[0](self.sim, self)
-        neuron.guid = neuron_dict['guid']
-        self.neurons.append(neuron)
-        for parent_dict in neuron_dict['parents']:
-            for parent_type, index in parent_dict.items():
-                if parent_type == 'sensor':
-                    neuron.add_parent(self.sensors[index])
-                else:
-                    assert parent_type == 'neuron'
-                    guid = index
-                    assert type(guid) == str
-                    parent_neuron = [n for n in self.neurons if n.guid == guid][0]
-                    neuron.add_parent(parent_neuron)
+        for neuron_dict in genome:
+            neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron_dict['type']]
+            assert len(neuron_classes) == 1
+            neuron = neuron_classes[0](self.sim, self)
+            neuron.guid = neuron_dict['guid']
+            self.neurons.append(neuron)
+
+    def add_connections_to_neurons(self, genome):
+        """
+        Connects all the neurons' parents and connections
+        """
+        for neuron_dict in genome:
+            neuron = [n for n in self.neurons if n.guid == neuron_dict['guid']][0]
+            self.add_parent_connections(neuron, neuron_dict)
+            self.add_outgoing_connections(neuron, neuron_dict)
+
+    def add_outgoing_connections(self, neuron, neuron_dict):
+        """
+        Connects a neuron to its outgoing connections
+        """
         for conn_dict in neuron_dict['connections']:
             for conn_type, index in conn_dict.items():
                 if conn_type == 'actuator':
-                    neuron.add_parent(self.actuators[index])
+                    neuron.add_parent(self.actuators[index])  # Assumption: actuators are all at the same indices in all organisms
                 else:
                     assert conn_type == 'neuron'
                     guid = index
                     assert type(guid) == str
-                    parent_neuron = [n for n in self.neurons if n.guid == guid][0]
+                    parent_neurons = [n for n in self.neurons if n.guid == guid]
+                    assert len(parent_neurons) == 1
+                    parent_neuron = parent_neurons[0]
                     neuron.add_parent(parent_neuron)
+
+    def add_parent_connections(self, neuron, neuron_dict):
+        """
+        Connects a neuron to its parents
+        """
+        for parent_dict in neuron_dict['parents']:
+            for parent_type, index in parent_dict.items():
+                if parent_type == 'sensor':
+                    neuron.add_parent(self.sensors[index])  # Assumption: sensors are all at the same indices in all organisms
+                else:
+                    assert parent_type == 'neuron'
+                    guid = index
+                    assert type(guid) == str
+                    parent_neurons = [n for n in self.neurons if n.guid == guid]
+                    assert len(parent_neurons) == 1
+                    parent_neuron = parent_neurons[0]
+                    neuron.add_parent(parent_neuron)
+
+    def copy_neuron(self, neuron_dict, prev_genome):
+        """
+        Takes a neuron dict from a different genome
+        """
 
     def copy_genome(self, genome):
         self.genome = genome
         self.neurons = []
-        for neuron_dict in genome:
-            self.copy_neuron(neuron_dict, genome)
+        self.duplicate_all_neurons(genome)
+        self.add_connections_to_neurons(genome)
 
     def mutate(self):
         # add a random neuron to the genome, or don't
