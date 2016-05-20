@@ -59,18 +59,18 @@ class Organism:
     def copy_genome(self, genome):
         self.genome = genome
         self.neurons = []
-        for neuron in genome:
+        for neuron_dict in genome:
             neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron['type']]
             assert len(neuron_classes) == 1
             neuron = neuron_classes[0](self.sim, self)
             self.neurons.append(neuron)
-            for parent_type, index in neuron['parents'].items():
+            for parent_type, index in neuron_dict['parents'].items():
                 if parent_type == 'sensor':
                     neuron.add_parent(self.sensors[index])
                 else:
                     assert parent_type == 'neuron'
                     neuron.add_parent(self.neurons[index])
-            for conn_type, index in neuron['connections'].items():
+            for conn_type, index in neuron_dict['connections'].items():
                 if conn_type == 'actuator':
                     neuron.add_parent(self.actuators[index])
                 else:
