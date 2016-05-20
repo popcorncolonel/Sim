@@ -14,11 +14,15 @@ class Tests(unittest.TestCase):
     sim = sim.Simulation(30, 30)
     org = organism.Organism(sim, 0, 0, power=10, representing_char='r')
     org2 = organism.Organism(sim, 3, 3, power=3, representing_char='b')
+    sim[org.x][org.y].append(org)
+    sim[org2.x][org2.y].append(org2)
 
     def reset(self):
         self.sim = sim.Simulation(30, 30)
         self.org = organism.Organism(self.sim, 0, 0, power=10, representing_char='r')
         self.org2 = organism.Organism(self.sim, 3, 3, power=3, representing_char='b')
+        self.sim[self.org.x][self.org.y].append(self.org)
+        self.sim[self.org2.x][self.org2.y].append(self.org2)
 
     def test_neurons(self):
         sensor = sensors.Sensor(self.sim, self.org)
@@ -74,6 +78,7 @@ class Tests(unittest.TestCase):
         actuator = actuators.TowardsActuator(self.sim, self.org)
         neuron.add_connection(actuator)
 
+        self.sim[dumbass.x][dumbass.y].append(dumbass)
         sensor.activate(dumbass, True)
         self.assertEqual(self.org.x, 1)
         self.assertEqual(self.org.y, 1)
@@ -86,6 +91,7 @@ class Tests(unittest.TestCase):
         actuator = actuators.AwayActuator(self.sim, self.org)
         neuron.add_connection(actuator)
 
+        self.sim[dumbass.x][dumbass.y].append(dumbass)
         sensor.activate(dumbass, True)
         self.assertEqual(self.org.x, self.sim.width-1)
         self.assertEqual(self.org.y, self.sim.height-1)

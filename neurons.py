@@ -1,3 +1,4 @@
+import uuid
 import random
 import sim_tools
 
@@ -21,6 +22,7 @@ class Neuron:
             parent.outgoing_connections.add(self)
         self.parent_signals = [None for _ in parents]
         self.parent_targets = [None for _ in parents]
+        self.guid = str(uuid.uuid4())  # Each neuron has a unique guid associated with it to uniquely identify what it is.
 
     def add_connection(self, connection):
         self.outgoing_connections.add(connection)

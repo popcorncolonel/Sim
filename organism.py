@@ -51,32 +51,38 @@ class Organism:
 
         longest_genome = max(parent1.genome, parent2.genome, key=lambda x: len(x))
         self.copy_genome(longest_genome)
-        # TODO: add randomness (randomly sometimes add neurons, or mess up existing ones
+        # TODO: add randomness (randomly sometimes add neurons, or mess up existing ones)
         # TODO: combine both genomes!
         # TODO: detect duplicate connections (like we don't want a sensor hooked up to an actuator twice)
+
+    def copy_neuron(self, neuron_dict, prev_genome):
+        """
+        Takes a neuron dict from a different genome
+        """
+        neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron_dict['type']]
+        assert len(neuron_classes) == 1
+        neuron = neuron_classes[0](self.sim, self)
+        self.neurons.append(neuron)
+        for parent_dict in neuron_dict['parents']:
+            for parent_type, index in parent_dict.items():
+                if parent_type == 'sensor':
+                    neuron.add_parent(self.sensors[index])
+                else:
+                    assert parent_type == 'neuron'
+                    neuron.add_parent(self.neurons[index])
+        for conn_dict in neuron_dict['connections']:
+            for conn_type, index in conn_dict.items():
+                if conn_type == 'actuator':
+                    neuron.add_parent(self.actuators[index])
+                else:
+                    assert conn_type == 'neuron'
+                    neuron.add_parent(self.neurons[index])
 
     def copy_genome(self, genome):
         self.genome = genome
         self.neurons = []
         for neuron_dict in genome:
-            neuron_classes = [C for C in self.neuron_classes if C.__id__ == neuron_dict['type']]
-            assert len(neuron_classes) == 1
-            neuron = neuron_classes[0](self.sim, self)
-            self.neurons.append(neuron)
-            for parent_dict in neuron_dict['parents']:
-                for parent_type, index in parent_dict.items():
-                    if parent_type == 'sensor':
-                        neuron.add_parent(self.sensors[index])
-                    else:
-                        assert parent_type == 'neuron'
-                        neuron.add_parent(self.neurons[index])
-            for conn_dict in neuron_dict['connections']:
-                for conn_type, index in conn_dict.items():
-                    if conn_type == 'actuator':
-                        neuron.add_parent(self.actuators[index])
-                    else:
-                        assert conn_type == 'neuron'
-                        neuron.add_parent(self.neurons[index])
+            self.copy_neuron(neuron_dict, genome)
 
     def assign_genome(self):
         self.sensors = brain.Sensors(self.sim, self).list
@@ -88,14 +94,13 @@ class Organism:
 
         self.neurons = []  # actual live instances of the neurons
         self.genome = []  # This should be dicts representing to what depth we connect stuff.
-                                # i.e. [ { "type": MoreKills,
-        #                                  "parents": ["sensor": 0, "neuron": 2], # can be sensors or neurons, but NOT actuators
-        #                                  "connections": ["actuator": 1, "neuron": 3"] } # can be actuators or neurons, but NOT sensors ]
+        # i.e. [ { "type": MoreKills,
+        #          "parents": ["sensor": 0, "neuron": <guid>], # can be sensors or neurons, but NOT actuators
+        #          "connections": ["actuator": 1, "neuron": <guid>"] } # can be actuators or neurons, but NOT sensors ]
         """ Neuron numbers are indices into the genome list. """
         self.assign_neurons()
 
-    def assign_neurons(self):
-        num_neurons = random.randint(1, 7)
+    def create_random_neuron(self):
         num_parents = random.randint(1, 3)
         num_conns = random.randint(1, 4)
 
@@ -111,11 +116,16 @@ class Organism:
                 neuron.add_connection(conn)
                 conn.add_parent(neuron)
 
+        neuron_class = random.choice(self.neuron_classes)
+        neuron = neuron_class(self.sim, self)
+        assign_parents(neuron)
+        assign_conns(neuron)
+        return neuron
+
+    def assign_neurons(self):
+        num_neurons = random.randint(1, 7)
         for _ in range(num_neurons):
-            neuron_class = random.choice(self.neuron_classes)
-            neuron = neuron_class(self.sim, self)
-            assign_parents(neuron)
-            assign_conns(neuron)
+            neuron = self.create_random_neuron()
             self.genome.append(neuron.to_dict(self.sensors, self.actuators))
             self.neurons.append(neuron)
             self.possible_parents.append(neuron)
