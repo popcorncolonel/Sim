@@ -3,6 +3,7 @@ import time
 
 from organism import Organism
 from sim_tools import bernoulli, Reprinter
+from collections import defaultdict
 
 
 class Simulation:
@@ -20,6 +21,7 @@ class Simulation:
         self.kill_list = []
         self.baby_list = []
         self.sim_start_time = time.time()
+        self.stats = defaultdict(int)
 
     def get_objs_at_pos(self, x, y, dx, dy) -> list:
         """
@@ -37,6 +39,7 @@ class Simulation:
     def clean_kill_list(self):
         for organism in self.kill_list:
             if organism in self.organisms:
+                self.stats['kills'] += 1
                 self.organisms.remove(organism)
                 self[organism.x][organism.y].remove(organism)
         self.kill_list = []
@@ -85,6 +88,7 @@ class Simulation:
             org = Organism(self, x, y, representing_char=representing_char, power=power)
         else:
             org = Organism(self, x, y, representing_char=representing_char, power=power, parent1=parents[0], parent2=parents[0])
+            self.stats['mates'] += 1
         self.baby_list.append(org)
         return org
 
@@ -101,12 +105,16 @@ class Simulation:
         this_str = '\n'.join(rows)
         this_str += '\n ' + '_' * self.height
         this_str += '\n' + "Organisms: " + str(len(self.organisms))
-        this_str += "  |  "
+        this_str += " | "
         this_str += "Max power: " + str(max(self.organisms, key=lambda x: x.power).power)
-        this_str += "  |  "
+        this_str += " | "
         this_str += "Max #kills: " + str(max(self.organisms, key=lambda x: x.kills).kills)
-        this_str += "  |  "
+        this_str += " | "
         this_str += "Max age: " + str(int(max(self.organisms, key=lambda x: x.get_age()).get_age()))
+        this_str += " | "
+        this_str += "Kills: " + str(self.stats['kills'])
+        this_str += " | "
+        this_str += "Kids: " + str(self.stats['mates'])
         this_str += '\n'
         return '\n' + this_str
 
