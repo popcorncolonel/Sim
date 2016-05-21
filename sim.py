@@ -56,7 +56,7 @@ class Simulation:
         self.clean_baby_list()
         for organism in self.organisms:
             organism.update()
-        if len(self.organisms) < (self.width + self.height) / 5 and bernoulli(0.1):
+        if len(self.organisms) < (self.width * self.height) / 20 and bernoulli(0.1):
             self.spawn_new_life()
 
     def run(self):

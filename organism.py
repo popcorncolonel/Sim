@@ -107,7 +107,6 @@ class Organism:
         # TODO: combine both genomes!
 
     def get_neuron_by_guid(self, guid) -> Neuron:
-        print(guid)
         neurons = [n for n in self.neurons if n.guid == guid]
         assert len(neurons) in [0, 1]
         if len(neurons) == 0:
@@ -134,7 +133,6 @@ class Organism:
         """
         Connects all the neurons' parents and connections
         """
-        print('a')
         for neuron_dict in genome:
             neuron = self.get_neuron_by_guid(neuron_dict['guid'])
             if neuron.parents != []:
@@ -145,7 +143,6 @@ class Organism:
             assert len(neuron.parent_targets) == 0
             assert len(neuron.outgoing_connections) == 0
             self.add_parent_connections(neuron, neuron_dict)
-            print(neuron.parents)
             self.add_outgoing_connections(neuron, neuron_dict)
 
     def add_outgoing_connections(self, neuron, neuron_dict):
@@ -215,7 +212,7 @@ class Organism:
 
     def check_status(self):
         age_in_seconds = self.get_age()
-        if age_in_seconds < 1200:
+        if age_in_seconds < 200:
             return
         died_of_old_age = bernoulli(age_in_seconds / 500000)
         if died_of_old_age:
