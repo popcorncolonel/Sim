@@ -109,7 +109,3 @@ class Tests(unittest.TestCase):
 
     def test_mating(self):
         dumbass = organism.Organism(self.sim, 1, 1, parent1=self.org, parent2=self.org2)
-        import pprint
-        print(self.org.genome)
-        print(self.org2.genome)
-        pprint.PrettyPrinter().pprint(dumbass.genome)
