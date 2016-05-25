@@ -128,6 +128,7 @@ class AttackActuator(Actuator):
         winner.kills += 1
         winner.hunger = 0
         winner.power += 1  # reward for winning
+        winner.start_time += (time.time() - winner.start_time) / 2
 
 
 class MateActuator(Actuator):
@@ -154,5 +155,6 @@ class MateActuator(Actuator):
         baby = self.sim.spawn_new_life(coords=parent_coords, representing_char=char,
                                        power=power_avg, parents=(self.org, target))
         self.org.mate_timeout = target.mate_timeout = time.time() + 30
+        self.org.start_time += (time.time() - self.org.start_time) / 2
         return baby
 

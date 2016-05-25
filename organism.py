@@ -70,7 +70,7 @@ class Organism:
         Creates a single neuron and returns it - does not add it to the genome
         """
         num_parents = random.randint(1, 3)
-        num_conns = random.randint(1, 4)
+        num_conns = random.randint(1, 3)
 
         def assign_parents(neuron):
             for _ in range(num_parents):
@@ -179,15 +179,37 @@ class Organism:
         self.genome += [n for n in genome if self.get_neuron_by_guid(n['guid']) is None]
         self.create_all_neurons(genome)
         self.add_connections_to_neurons(genome)
+        self.mutate()
 
     def mutate(self):
         # Add a random neuron to the genome, or don't
         if bernoulli(0.3):
             neuron = self.create_random_neuron()
             self.add_neuron_to_genome(neuron)
-        if bernoulli(0.001):
-            # TODO: mess up a current neuron be changing one of its parents or outgoing conns
-            pass
+        if bernoulli(0.1):
+            return
+            # TODO: rework this?
+            # mess up a current neuron be changing one of its parents or outgoing conns
+            random_neuron = random.choice(self.neurons)
+            assert isinstance(random_neuron, Neuron)
+            genome_index = random_neuron.to_dict(self.sensors, self.actuators)
+            if bernoulli(0.5):  # Mutate parent
+                parent_index = random.randint(0, len(random_neuron.parents)-1)
+                rand_parent = random.choice(self.possible_parents)
+                while rand_parent == random_neuron:
+                    rand_parent = random.choice(self.possible_parents)
+                random_neuron.parents[parent_index] = rand_parent
+                rand_parent.add_connection(random_neuron)
+            else:  # Mutate connection
+                conn_index = random.randint(0, len(random_neuron.outgoing_connections)-1)
+                rand_conn = random.choice(self.possible_connections)
+                while rand_conn == random_neuron:
+                    rand_conn = random.choice(self.possible_connections)
+                random_neuron.outgoing_connections[conn_index] = rand_conn
+                rand_conn.add_parent(random_neuron)
+            self.genome[genome_index] = random_neuron.to_dict(self.sensors, self.actuators)
+            sys.exit()
+
 
     def get_age(self):
         return int(time.time() - self.start_time)

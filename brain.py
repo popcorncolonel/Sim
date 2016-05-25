@@ -57,14 +57,11 @@ class Neurons:
             neurons.SameSpecies,
             neurons.GreaterPower,
             neurons.LessPower,
-            neurons.MoreKills,
-            neurons.FewerKills,
 
             neurons.GreaterPowerByN(3),
             neurons.LessPowerByN(3),
+            neurons.WithinNUnits(2),
             neurons.WithinNUnits(3),
-            neurons.GreaterPowerByN(5),
-            neurons.LessPowerByN(5),
             neurons.WithinNUnits(5),
         ]
 
